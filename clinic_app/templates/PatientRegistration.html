@@ -1,0 +1,98 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clinic Management System</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+
+<header>
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <a class="navbar-brand" href="{% url 'home' %}">Clinic Management System</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'home' %}">Home</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="{% url 'patientregistration' %}">Patient Registration</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'availabledoctor' %}">Available Doctors</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'aboutus' %}">About Us</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Log In
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="{% url 'userlogin' %}">Patient</a>
+            <a class="dropdown-item" href="{% url 'adminlogin' %}">Admin</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<div class="container">
+  <div class="jumbotron">
+    <center><h2 class="display-5">Patient Registration</h2></center>
+    <form method="post" action="#">
+      <div class="form-group">
+        <label for="fullName">Full Name<span style="color: red;">*</span></label>
+        <input type="text" class="form-control" id="fullName" name="fullName" placeholder="Enter your full name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email address<span style="color: red;">*</span></label>
+        <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Enter email" required>
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+      </div>
+      <div class="form-group">
+        <label for="phoneNumber">Phone Number<span style="color: red;">*</span></label>
+        <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="Enter your phone number" required>
+      </div>
+      <div class="form-group">
+        <label for="dob">Date of Birth<span style="color: red;">*</span></label>
+        <input type="date" class="form-control" id="dob" name="dob" required>
+      </div>
+      <div class="form-group">
+        <label for="address">Address<span style="color: red;">*</span></label>
+        <textarea class="form-control" id="address" name="address" rows="3" placeholder="Enter your address" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="password">Password<span style="color: red;">*</span></label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p>&copy; 2024 Clinic Management System</p>
+  </div>
+</footer>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

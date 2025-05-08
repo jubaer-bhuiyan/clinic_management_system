@@ -1,0 +1,29 @@
+body {
+        background-color: #f0f8ff; /* light sky blue */
+    }
+    .navbar {
+        background-color: #87ceeb; /* sky blue */
+    }
+    .navbar-brand, .navbar-nav .nav-link {
+        color: #f8f9fa; /* off-gray white */
+    }
+    .jumbotron {
+        background-color: #f8f9fa; /* off-gray white */
+        margin-top: 20px;
+    }
+    .footer {
+        background-color: #87ceeb; /* sky blue */
+        color:rgb(18, 18, 18); /* off-gray white */
+        text-align: center;
+        padding: 10px 0;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+    .footer p {
+        margin-bottom: 0;
+    }
+    .jumbotron img {
+        width: 1000px;
+        height: 400px;
+    }
