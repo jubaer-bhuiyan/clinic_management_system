@@ -97,5 +97,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙋‍♂️ Author
 
-**Md. Jubaer Bhuiyan**  
+**Jubaer Ahamed Bhuiyan**  
 GitHub: [@jubaer-bhuiyan](https://github.com/jubaer-bhuiyan)
