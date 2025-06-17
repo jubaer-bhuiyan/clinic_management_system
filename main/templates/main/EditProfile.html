@@ -1,0 +1,178 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Clinic Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Edit Profile</h2>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="mb-3">Account Information</h4>
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           value="{{ user.email }}" required>
+                                    <div class="invalid-feedback">
+                                        Please provide a valid email.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h4 class="mb-3">Personal Information</h4>
+                                <div class="form-group">
+                                    <label for="first_name">First Name</label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name" 
+                                           value="{{ user.first_name }}" required>
+                                    <div class="invalid-feedback">
+                                        Please provide your first name.
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="last_name">Last Name</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name" 
+                                           value="{{ user.last_name }}" required>
+                                    <div class="invalid-feedback">
+                                        Please provide your last name.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <h4 class="mb-3">Contact Information</h4>
+                                <div class="form-group">
+                                    <label for="phone">Phone Number</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" 
+                                           value="{% if user.patient %}{{ user.patient.phone }}{% elif user.doctor %}{{ user.doctor.phone }}{% elif user.staff %}{{ user.staff.phone }}{% endif %}" 
+                                           required>
+                                    <div class="invalid-feedback">
+                                        Please provide a valid phone number.
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="address">Address</label>
+                                    <textarea class="form-control" id="address" name="address" rows="3" required>{% if user.patient %}{{ user.patient.address }}{% elif user.doctor %}{{ user.doctor.address }}{% elif user.staff %}{{ user.staff.address }}{% endif %}</textarea>
+                                    <div class="invalid-feedback">
+                                        Please provide your address.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if user.patient %}
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="date_of_birth">Date of Birth</label>
+                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" 
+                                           value="{{ user.patient.date_of_birth|date:'Y-m-d' }}" required>
+                                    <div class="invalid-feedback">
+                                        Please provide your date of birth.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if user.doctor %}
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="specialization">Specialization</label>
+                                    <input type="text" class="form-control" id="specialization" name="specialization" 
+                                           value="{{ user.doctor.specialization }}" required>
+                                    <div class="invalid-feedback">
+                                        Please provide your specialization.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if user.staff %}
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="position">Position</label>
+                                    <input type="text" class="form-control" id="position" name="position" 
+                                           value="{{ user.staff.position }}" required>
+                                    <div class="invalid-feedback">
+                                        Please provide your position.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            {% if user.patient %}
+                                <a href="{% url 'patient_profile' %}" class="btn btn-secondary">Cancel</a>
+                            {% elif user.doctor %}
+                                <a href="{% url 'doctor_profile' %}" class="btn btn-secondary">Cancel</a>
+                            {% elif user.staff %}
+                                <a href="{% url 'staff_profile' %}" class="btn btn-secondary">Cancel</a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    });
+})();
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+.form-group label {
+    font-weight: 500;
+    color: #495057;
+}
+</style>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,127 @@
+body {
+    background-color: #f0f8ff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar {
+    background-color: #87ceeb;
+    padding: 1rem 2rem;
+}
+
+.navbar-brand, .navbar-nav .nav-link {
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #f8f9fa !important;
+}
+
+.navbar-nav .active .nav-link {
+    color: #004085 !important;
+    font-weight: 600;
+}
+
+.dropdown-menu {
+    background-color: #87ceeb;
+    border: none;
+}
+
+.dropdown-item {
+    color: #ffffff;
+}
+
+.dropdown-item:hover {
+    background-color: #5f9ea0;
+    color: #ffffff;
+}
+
+.jumbotron {
+    background-color: #ffffff;
+    margin-top: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+    flex: 1;
+}
+
+.footer {
+    background-color: #87ceeb;
+    color: #ffffff;
+    text-align: center;
+    padding: 1rem 0;
+    margin-top: 2rem;
+    width: 100%;
+}
+
+.footer p {
+    margin-bottom: 0;
+}
+
+.jumbotron img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Styles */
+.form-container {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #004085;
+}
+
+.btn-primary {
+    background-color: #87ceeb;
+    border-color: #87ceeb;
+}
+
+.btn-primary:hover {
+    background-color: #5f9ea0;
+    border-color: #5f9ea0;
+}
+
+/* Table Styles */
+.table {
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.table thead {
+    background-color: #87ceeb;
+    color: #ffffff;
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: #87ceeb;
+    color: #ffffff;
+    border-bottom: none;
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}

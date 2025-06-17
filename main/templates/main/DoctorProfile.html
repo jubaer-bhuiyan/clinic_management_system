@@ -1,0 +1,406 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Doctor Dashboard - Clinic Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Profile Information</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Dr. {{ user.get_full_name }}</h5>
+                    <p class="card-text"><strong>Specialization:</strong> {{ user.doctor.specialization }}</p>
+                    <p class="card-text"><strong>Email:</strong> {{ user.email }}</p>
+                    <p class="card-text"><strong>Phone:</strong> {{ user.doctor.phone }}</p>
+                    <p class="card-text"><strong>Address:</strong> {{ user.doctor.address }}</p>
+                    <div class="mt-3">
+                        <a href="{% url 'edit_profile' %}" class="btn btn-primary btn-sm">Edit Profile</a>
+                        <a href="{% url 'change_password' %}" class="btn btn-outline-primary btn-sm">Change Password</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Appointments -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Upcoming Appointments</h4>
+                </div>
+                <div class="card-body">
+                    {% if appointments %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Patient</th>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Reason</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in appointments %}
+                                        <tr>
+                                            <td>{{ appointment.patient.user.get_full_name }}</td>
+                                            <td>{{ appointment.appointment_date }}</td>
+                                            <td>{{ appointment.appointment_time }}</td>
+                                            <td>{{ appointment.reason }}</td>
+                                            <td>
+                                                <span class="badge badge-{{ appointment.status|lower }}">
+                                                    {{ appointment.status }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-success" onclick="updateAppointmentStatus('{{ appointment.id }}', 'CONFIRMED')">
+                                                    Confirm
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="updateAppointmentStatus('{{ appointment.id }}', 'CANCELLED')">
+                                                    Cancel
+                                                </button>
+                                                <button class="btn btn-sm btn-primary" onclick="addMedicalRecord('{{ appointment.patient.id }}')">
+                                                    Add Record
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No upcoming appointments.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Medical Records -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Recent Medical Records</h4>
+                    <a href="{% url 'view_record' %}" class="btn btn-primary btn-sm">View All Records</a>
+                </div>
+                <div class="card-body">
+                    {% if records %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Patient</th>
+                                        <th>Category</th>
+                                        <th>Diagnosis</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in records %}
+                                        <tr>
+                                            <td>{{ record.created_at|date:"M d, Y" }}</td>
+                                            <td>{{ record.patient.user.get_full_name }}</td>
+                                            <td>{{ record.category }}</td>
+                                            <td>{{ record.diagnosis|truncatechars:30 }}</td>
+                                            <td>
+                                                <span class="badge badge-{{ record.status|lower }}">
+                                                    {{ record.status }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info" onclick="viewRecord('{{ record.id }}')">
+                                                    View
+                                                </button>
+                                                <button class="btn btn-sm btn-primary" onclick="editRecord('{{ record.id }}')">
+                                                    Edit
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No medical records found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Record Modal -->
+<div class="modal fade" id="recordModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="recordModalTitle">Add Medical Record</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="recordForm">
+                    <input type="hidden" id="recordId">
+                    <input type="hidden" id="patientId">
+                    
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select class="form-control" id="category" required>
+                            <option value="General">General</option>
+                            <option value="Emergency">Emergency</option>
+                            <option value="Follow-up">Follow-up</option>
+                            <option value="Specialist">Specialist</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="diagnosis">Diagnosis</label>
+                        <textarea class="form-control" id="diagnosis" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="prescription">Prescription</label>
+                        <textarea class="form-control" id="prescription" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Additional Notes</label>
+                        <textarea class="form-control" id="notes" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select class="form-control" id="status" required>
+                            <option value="Active">Active</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Follow-up Required">Follow-up Required</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveRecord()">Save Record</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Record Modal -->
+<div class="modal fade" id="viewRecordModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">View Medical Record</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Patient:</strong> <span id="viewPatientName"></span></p>
+                        <p><strong>Date:</strong> <span id="viewDate"></span></p>
+                        <p><strong>Category:</strong> <span id="viewCategory"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Doctor:</strong> <span id="viewDoctorName"></span></p>
+                        <p><strong>Status:</strong> <span id="viewStatus"></span></p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><strong>Diagnosis:</strong></label>
+                    <p id="viewDiagnosis"></p>
+                </div>
+                <div class="form-group">
+                    <label><strong>Prescription:</strong></label>
+                    <p id="viewPrescription"></p>
+                </div>
+                <div class="form-group">
+                    <label><strong>Additional Notes:</strong></label>
+                    <p id="viewNotes"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function updateAppointmentStatus(appointmentId, status) {
+    fetch(`/update-appointment-status/${appointmentId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error updating appointment status');
+        }
+    });
+}
+
+function addMedicalRecord(patientId) {
+    $('#recordModalTitle').text('Add Medical Record');
+    $('#recordForm')[0].reset();
+    $('#recordId').val('');
+    $('#patientId').val(patientId);
+    $('#recordModal').modal('show');
+}
+
+function editRecord(recordId) {
+    $('#recordModalTitle').text('Edit Medical Record');
+    fetch(`/get-record-details/${recordId}/`)
+        .then(response => response.json())
+        .then(data => {
+            $('#recordId').val(recordId);
+            $('#category').val(data.category);
+            $('#diagnosis').val(data.diagnosis);
+            $('#prescription').val(data.prescription);
+            $('#notes').val(data.notes);
+            $('#status').val(data.status);
+            $('#recordModal').modal('show');
+        });
+}
+
+function viewRecord(recordId) {
+    fetch(`/get-record-details/${recordId}/`)
+        .then(response => response.json())
+        .then(data => {
+            $('#viewPatientName').text(data.patient_name);
+            $('#viewDoctorName').text(data.doctor_name);
+            $('#viewDate').text(data.date);
+            $('#viewCategory').text(data.category);
+            $('#viewDiagnosis').text(data.diagnosis);
+            $('#viewPrescription').text(data.prescription);
+            $('#viewNotes').text(data.notes);
+            $('#viewStatus').text(data.status);
+            $('#viewRecordModal').modal('show');
+        });
+}
+
+function saveRecord() {
+    const recordId = $('#recordId').val();
+    const data = {
+        patient: $('#patientId').val(),
+        category: $('#category').val(),
+        diagnosis: $('#diagnosis').val(),
+        prescription: $('#prescription').val(),
+        notes: $('#notes').val(),
+        status: $('#status').val()
+    };
+
+    const url = recordId ? `/update-record/${recordId}/` : '/add-record/';
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            $('#recordModal').modal('hide');
+            location.reload();
+        } else {
+            alert('Error saving record');
+        }
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.badge {
+    padding: 0.5em 0.75em;
+}
+
+.badge-pending {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.badge-confirmed {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.badge-cancelled {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.badge-completed {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.badge-active {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.badge-follow-up {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.btn-sm {
+    margin-right: 0.25rem;
+}
+
+.table th {
+    font-weight: 600;
+    color: #495057;
+}
+
+.modal-lg {
+    max-width: 800px;
+}
+</style>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - Clinic Management System{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+  <h2 class="mb-4">Admin Dashboard</h2>
+  
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row">
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Doctor Management</h5>
+        </div>
+        <div class="card-body">
+          <div class="list-group">
+            <a href="{% url 'add_doctor' %}" class="list-group-item list-group-item-action">Add New Doctor</a>
+            <a href="{% url 'view_doctors' %}" class="list-group-item list-group-item-action">View All Doctors</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Staff Management</h5>
+        </div>
+        <div class="card-body">
+          <div class="list-group">
+            <a href="{% url 'add_staff' %}" class="list-group-item list-group-item-action">Add New Staff</a>
+            <a href="{% url 'view_staffs' %}" class="list-group-item list-group-item-action">View All Staff</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Patient Management</h5>
+        </div>
+        <div class="card-body">
+          <div class="list-group">
+            <a href="{% url 'manage_patient_profile' %}" class="list-group-item list-group-item-action">Manage Patient Profiles</a>
+            <a href="{% url 'view_record' %}" class="list-group-item list-group-item-action">View Medical Records</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-6 offset-md-3">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Account Settings</h5>
+        </div>
+        <div class="card-body">
+          <div class="list-group">
+            <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action">Change Password</a>
+            <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_css %}
+<style>
+  .admin-dashboard .card {
+    transition: transform 0.2s;
+  }
+  .admin-dashboard .card:hover {
+    transform: translateY(-5px);
+  }
+  .admin-dashboard .list-group-item {
+    border: none;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: #f8f9fa;
+  }
+  .admin-dashboard .list-group-item:hover {
+    background-color: #e9ecef;
+  }
+  .admin-dashboard .text-danger:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+  }
+</style>
+{% endblock %}
+{% endblock %}

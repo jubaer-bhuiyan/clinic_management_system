@@ -1,0 +1,90 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}About Us - Clinic Management System{% endblock %}
+
+{% block content %}
+<div class="about-us">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h2 class="mb-0">About Our Clinic</h2>
+        </div>
+        <div class="card-body">
+          <p class="lead">Welcome to our state-of-the-art Clinic Management System, where we prioritize your health and well-being through efficient healthcare management and exceptional service.</p>
+          
+          <h4 class="mt-4">Our Mission</h4>
+          <p>To provide accessible, high-quality healthcare services through an efficient and user-friendly management system that connects patients with healthcare professionals seamlessly.</p>
+          
+          <h4 class="mt-4">Our Services</h4>
+          <div class="row mt-3">
+            <div class="col-md-4">
+              <div class="service-card">
+                <h5>Online Appointments</h5>
+                <p>Schedule appointments with our qualified doctors at your convenience.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="service-card">
+                <h5>Digital Records</h5>
+                <p>Access your medical history and treatment records securely online.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="service-card">
+                <h5>Expert Care</h5>
+                <p>Receive care from our experienced healthcare professionals.</p>
+              </div>
+            </div>
+          </div>
+          
+          <h4 class="mt-4">Why Choose Us?</h4>
+          <ul class="feature-list">
+            <li>24/7 Online Access to Healthcare Services</li>
+            <li>Experienced Medical Professionals</li>
+            <li>State-of-the-art Facilities</li>
+            <li>Efficient Appointment Management</li>
+            <li>Secure Patient Information System</li>
+            <li>Comprehensive Healthcare Solutions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_css %}
+<style>
+  .about-us {
+    padding: 2rem 0;
+  }
+  .service-card {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    height: 100%;
+    transition: transform 0.2s;
+  }
+  .service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  .feature-list {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  .feature-list li {
+    padding: 0.5rem 0;
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  .feature-list li:before {
+    content: "✓";
+    color: #28a745;
+    position: absolute;
+    left: 0;
+  }
+</style>
+{% endblock %}
+{% endblock %}

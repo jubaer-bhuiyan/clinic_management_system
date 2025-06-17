@@ -1,0 +1,103 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Edit Medical Record - Clinic Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Edit Medical Record</h2>
+                <a href="{% url 'view_record' %}" class="btn btn-secondary">Back to Records</a>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="patient">Patient</label>
+                                    <input type="text" class="form-control" value="{{ record.patient.user.get_full_name }}" readonly>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="doctor">Doctor</label>
+                                    <input type="text" class="form-control" value="Dr. {{ record.doctor.user.get_full_name }}" readonly>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="category">Category</label>
+                                    <select class="form-control" id="category" name="category" required>
+                                        {% for category_value, category_label in categories %}
+                                            <option value="{{ category_value }}" {% if record.category == category_value %}selected{% endif %}>
+                                                {{ category_label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="status">Status</label>
+                                    <select class="form-control" id="status" name="status" required>
+                                        {% for status_value, status_label in statuses %}
+                                            <option value="{{ status_value }}" {% if record.status == status_value %}selected{% endif %}>
+                                                {{ status_label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="diagnosis">Diagnosis</label>
+                                    <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3" required>{{ record.diagnosis }}</textarea>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="prescription">Prescription</label>
+                                    <textarea class="form-control" id="prescription" name="prescription" rows="3" required>{{ record.prescription }}</textarea>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="notes">Additional Notes</label>
+                                    <textarea class="form-control" id="notes" name="notes" rows="3">{{ record.notes }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">Update Record</button>
+                                <a href="{% url 'view_record' %}" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    .readonly-field {
+        background-color: #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Add any necessary JavaScript for form validation or dynamic behavior
+});
+</script>
+{% endblock %} 

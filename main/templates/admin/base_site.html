@@ -1,0 +1,24 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block footer %}
+<div id="footer">
+    <div class="content">
+        <div style="text-align: center; padding: 10px;">
+            <p>Clinical Appointment Management System (CAMS)</p>
+            <p>Developed by: Jubaer Ahamed Bhuiyan</p>
+            <p>&copy; 2024 All rights reserved.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Patient Records - Clinic Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Patient Records</h2>
+        <a href="{% url 'manage_patient_profile' %}" class="btn btn-secondary">Back to Patient List</a>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="mb-0">Patient Information</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Name:</strong> {{ patient.user.get_full_name }}</p>
+                    <p><strong>Email:</strong> {{ patient.user.email }}</p>
+                    <p><strong>Phone:</strong> {{ patient.phone }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Date of Birth:</strong> {{ patient.date_of_birth }}</p>
+                    <p><strong>Address:</strong> {{ patient.address }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Medical Records</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Doctor</th>
+                            <th>Diagnosis</th>
+                            <th>Prescription</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                        <tr>
+                            <td>{{ record.created_at|date:"M d, Y" }}</td>
+                            <td>Dr. {{ record.doctor.user.get_full_name }}</td>
+                            <td>{{ record.diagnosis }}</td>
+                            <td>{{ record.prescription }}</td>
+                            <td>{{ record.notes }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No medical records found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

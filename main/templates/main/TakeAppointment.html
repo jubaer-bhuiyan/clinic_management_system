@@ -1,0 +1,150 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Book Appointment - Clinic Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Book an Appointment</h2>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="doctor">Select Doctor</label>
+                            <select class="form-control" id="doctor" name="doctor" required {% if selected_doctor %}disabled{% endif %}>
+                                <option value="">Choose a doctor...</option>
+                                {% for doctor in doctors %}
+                                    <option value="{{ doctor.id }}" {% if selected_doctor.id == doctor.id %}selected{% endif %}>
+                                        Dr. {{ doctor.user.get_full_name }} - {{ doctor.specialization }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if selected_doctor %}
+                                <input type="hidden" name="doctor" value="{{ selected_doctor.id }}">
+                            {% endif %}
+                            <div class="invalid-feedback">
+                                Please select a doctor.
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="appointment_date">Appointment Date</label>
+                                    <input type="date" class="form-control" id="appointment_date" name="appointment_date" 
+                                           required min="{{ today|date:'Y-m-d' }}">
+                                    <div class="invalid-feedback">
+                                        Please select a valid date.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="appointment_time">Appointment Time</label>
+                                    <input type="time" class="form-control" id="appointment_time" name="appointment_time" 
+                                           required min="09:00" max="17:00">
+                                    <small class="form-text text-muted">
+                                        Clinic hours: 9:00 AM to 5:00 PM
+                                    </small>
+                                    <div class="invalid-feedback">
+                                        Please select a valid time between 9 AM and 5 PM.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reason">Reason for Visit</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
+                            <div class="invalid-feedback">
+                                Please provide a reason for your visit.
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">Schedule Appointment</button>
+                            <a href="{% url 'available_doctors' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    });
+
+    // Time validation
+    var timeInput = document.getElementById('appointment_time');
+    timeInput.addEventListener('change', function() {
+        var time = this.value;
+        var hours = parseInt(time.split(':')[0]);
+        if (hours < 9 || hours >= 17) {
+            this.setCustomValidity('Please select a time between 9 AM and 5 PM');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+
+    // Date validation
+    var dateInput = document.getElementById('appointment_date');
+    var today = new Date().toISOString().split('T')[0];
+    dateInput.setAttribute('min', today);
+    dateInput.addEventListener('change', function() {
+        if (this.value < today) {
+            this.setCustomValidity('Please select a future date');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+})();
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+.form-group label {
+    font-weight: 500;
+    color: #495057;
+}
+select:disabled {
+    background-color: #e9ecef;
+}
+</style>
+{% endblock %}
+{% endblock %}
