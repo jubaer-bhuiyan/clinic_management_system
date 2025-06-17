@@ -25,9 +25,22 @@
                     <div class="col-md-6">
                         <h4 class="mb-3">Account Information</h4>
                         <div class="form-group">
+                            <label for="username">Username</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="username" name="username" required minlength="3" maxlength="30" pattern="^[a-zA-Z0-9_]+$">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">
+                                        <i id="username-status" class="fas"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <small id="username-feedback" class="form-text"></small>
+                            <small class="form-text text-muted">Username can only contain letters, numbers, and underscores.</small>
+                        </div>
+                        <div class="form-group">
                             <label for="email">Email</label>
                             <input type="email" class="form-control" id="email" name="email" required>
-                            <small class="form-text text-muted">This will be used as the username for login.</small>
+                            <small class="form-text text-muted">We'll never share your email with anyone else.</small>
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
@@ -107,6 +120,76 @@ document.getElementById('password').addEventListener('input', function() {
     } else {
         this.setCustomValidity('');
     }
+});
+
+// Username validation
+let usernameTimeout;
+const usernameInput = document.getElementById('username');
+const usernameFeedback = document.getElementById('username-feedback');
+const usernameStatus = document.getElementById('username-status');
+
+usernameInput.addEventListener('input', function() {
+    clearTimeout(usernameTimeout);
+    const username = this.value;
+    
+    // Reset validation state
+    this.setCustomValidity('');
+    usernameFeedback.className = 'form-text';
+    usernameStatus.className = 'fas';
+    
+    // Basic validation
+    if (!username) {
+        usernameFeedback.textContent = 'Username is required';
+        usernameFeedback.className = 'form-text text-danger';
+        usernameStatus.className = 'fas fa-times text-danger';
+        this.setCustomValidity('Username is required');
+        return;
+    }
+    
+    if (username.length < 3) {
+        usernameFeedback.textContent = 'Username must be at least 3 characters long';
+        usernameFeedback.className = 'form-text text-danger';
+        usernameStatus.className = 'fas fa-times text-danger';
+        this.setCustomValidity('Username must be at least 3 characters long');
+        return;
+    }
+    
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        usernameFeedback.textContent = 'Username can only contain letters, numbers, and underscores';
+        usernameFeedback.className = 'form-text text-danger';
+        usernameStatus.className = 'fas fa-times text-danger';
+        this.setCustomValidity('Username can only contain letters, numbers, and underscores');
+        return;
+    }
+    
+    // Show checking status
+    usernameFeedback.textContent = 'Checking availability...';
+    usernameFeedback.className = 'form-text text-muted';
+    usernameStatus.className = 'fas fa-spinner fa-spin';
+    
+    // Check username availability after a short delay
+    usernameTimeout = setTimeout(() => {
+        fetch(`/check-username/?username=${encodeURIComponent(username)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.available) {
+                    usernameFeedback.textContent = 'Username is available';
+                    usernameFeedback.className = 'form-text text-success';
+                    usernameStatus.className = 'fas fa-check text-success';
+                    this.setCustomValidity('');
+                } else {
+                    usernameFeedback.textContent = 'Username is already taken';
+                    usernameFeedback.className = 'form-text text-danger';
+                    usernameStatus.className = 'fas fa-times text-danger';
+                    this.setCustomValidity('Username is already taken');
+                }
+            })
+            .catch(error => {
+                usernameFeedback.textContent = 'Error checking username availability';
+                usernameFeedback.className = 'form-text text-danger';
+                usernameStatus.className = 'fas fa-exclamation-triangle text-warning';
+            });
+    }, 500);
 });
 </script>
 {% endblock %}

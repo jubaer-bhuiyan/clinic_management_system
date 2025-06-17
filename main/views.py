@@ -611,54 +611,57 @@ def view_patient_records(request, patient_id):
     })
 
 def patient_registration(request):
-    # Get next URL from either GET or POST
-    next_url = request.POST.get('next', request.GET.get('next', ''))
-    
     if request.method == 'POST':
-        # Get form data
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
+        username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
         phone = request.POST.get('phone')
-        address = request.POST.get('address')
         date_of_birth = request.POST.get('date_of_birth')
-
+        address = request.POST.get('address')
+        
+        # Validate username
+        if not username or len(username) < 3:
+            messages.error(request, 'Username must be at least 3 characters long')
+            return redirect('patient_registration')
+            
+        if not username.isalnum() and '_' not in username:
+            messages.error(request, 'Username can only contain letters, numbers, and underscores')
+            return redirect('patient_registration')
+            
+        if User.objects.filter(username__iexact=username).exists():
+            messages.error(request, 'Username is already taken')
+            return redirect('patient_registration')
+        
         try:
-            # Check if user already exists
-            if User.objects.filter(username=email).exists():
-                messages.error(request, 'A user with this email already exists')
-                return render(request, 'main/PatientRegistration.html', {'next': next_url})
-
             # Create user account
             user = User.objects.create_user(
-                username=email,
+                username=username,
                 email=email,
                 password=password,
                 first_name=first_name,
                 last_name=last_name
             )
-
+            
             # Create patient profile
-            Patient.objects.create(
+            patient = Patient.objects.create(
                 user=user,
                 phone=phone,
-                address=address,
-                date_of_birth=date_of_birth
+                date_of_birth=date_of_birth,
+                address=address
             )
-
-            messages.success(request, 'Registration successful! Please login to continue.')
-            # If there's a next URL, redirect to login with next parameter
-            if next_url:
-                if url_has_allowed_host_and_scheme(next_url, allowed_hosts=None):
-                    return redirect(f'/login/?next={next_url}')
+            
+            messages.success(request, 'Registration successful! Please login.')
             return redirect('user_login')
-
+            
         except Exception as e:
-            messages.error(request, f'Error registering patient: {str(e)}')
-            return render(request, 'main/PatientRegistration.html', {'next': next_url})
-
-    return render(request, 'main/PatientRegistration.html', {'next': next_url})
+            messages.error(request, 'An error occurred during registration. Please try again.')
+            if user:
+                user.delete()
+            return redirect('patient_registration')
+    
+    return render(request, 'main/PatientRegistration.html')
 
 def doctor_login(request):
     if request.method == 'POST':
@@ -785,3 +788,28 @@ def edit_record(request, record_id):
         'statuses': Record.STATUS_CHOICES
     }
     return render(request, 'main/EditRecord.html', context)
+
+def check_username(request):
+    """
+    Check if a username is available.
+    Returns JSON response with availability status.
+    """
+    username = request.GET.get('username', '').strip()
+    
+    if not username:
+        return JsonResponse({'available': False, 'message': 'Username is required'})
+    
+    # Check if username meets basic requirements
+    if len(username) < 3:
+        return JsonResponse({'available': False, 'message': 'Username must be at least 3 characters long'})
+    
+    if not username.isalnum() and '_' not in username:
+        return JsonResponse({'available': False, 'message': 'Username can only contain letters, numbers, and underscores'})
+    
+    # Check if username exists
+    exists = User.objects.filter(username__iexact=username).exists()
+    
+    return JsonResponse({
+        'available': not exists,
+        'message': 'Username is available' if not exists else 'Username is already taken'
+    })
