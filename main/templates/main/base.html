@@ -10,8 +10,10 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    
     <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    <!-- Base Styles -->
     <style>
         body {
             background-color: #f0f8ff;
@@ -19,7 +21,7 @@
             display: flex;
             flex-direction: column;
             margin: 0;
-            padding-bottom: 80px; /* Increased padding to prevent content overlap */
+            padding-bottom: 80px;
             position: relative;
         }
         
@@ -33,7 +35,7 @@
         
         .content-wrapper {
             flex: 1 0 auto;
-            min-height: calc(100vh - 140px); /* Adjust for navbar and footer */
+            min-height: calc(100vh - 140px);
         }
         
         .footer {
@@ -45,7 +47,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: auto; /* Allow footer to adjust its height */
+            height: auto;
             min-height: 60px;
         }
         

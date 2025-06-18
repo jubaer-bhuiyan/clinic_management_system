@@ -1,11 +1,22 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class AdminProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=20)
+    address = models.TextField()
+    profile_picture = models.ImageField(upload_to='profile_pictures/admins/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - Admin"
+
 class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     specialization = models.CharField(max_length=100)
     phone = models.CharField(max_length=20)
     address = models.TextField()
+    profile_picture = models.ImageField(upload_to='profile_pictures/doctors/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -16,6 +27,7 @@ class Staff(models.Model):
     position = models.CharField(max_length=100)
     phone = models.CharField(max_length=20)
     address = models.TextField()
+    profile_picture = models.ImageField(upload_to='profile_pictures/staff/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -26,6 +38,7 @@ class Patient(models.Model):
     phone = models.CharField(max_length=20)
     address = models.TextField()
     date_of_birth = models.DateField()
+    profile_picture = models.ImageField(upload_to='profile_pictures/patients/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

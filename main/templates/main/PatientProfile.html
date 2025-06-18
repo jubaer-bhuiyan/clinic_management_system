@@ -11,7 +11,14 @@
         <div class="card-header">
           <h4 class="mb-0">Profile Information</h4>
         </div>
-        <div class="card-body">
+        <div class="card-body text-center">
+          <div class="profile-picture-container mb-4">
+            {% if user.patient.profile_picture %}
+              <img src="{{ user.patient.profile_picture.url }}?v={{ user.patient.profile_picture.name|urlencode }}&t={{ request.GET.t|default:'' }}" alt="Profile Picture" class="profile-picture">
+            {% else %}
+              <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture" class="profile-picture">
+            {% endif %}
+          </div>
           <h5 class="card-title">{{ user.get_full_name }}</h5>
           <p class="card-text"><strong>Username:</strong> {{ user.username }}</p>
           <p class="card-text"><strong>Email:</strong> {{ user.email }}</p>
@@ -122,6 +129,18 @@
   .card-header {
     background-color: #87ceeb;
     color: white;
+  }
+  .profile-picture-container {
+    position: relative;
+    display: inline-block;
+  }
+  .profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
   }
   .badge-pending {
     background-color: #ffc107;

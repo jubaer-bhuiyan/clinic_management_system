@@ -1,1 +1,174 @@
- 
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Edit Staff - Clinic Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Edit Staff Member</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4 class="mb-3">Account Information</h4>
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" value="{{ staff.user.username }}" readonly>
+                            <small class="form-text text-muted">Username cannot be changed.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ staff.user.email }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">New Password (leave blank to keep current)</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">
+                                        <i id="password-status" class="fas"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <small id="password-feedback" class="form-text"></small>
+                            <small class="form-text text-muted">If changing, password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h4 class="mb-3">Personal Information</h4>
+                        <div class="form-group">
+                            <label for="first_name">First Name</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ staff.user.first_name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="last_name">Last Name</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ staff.user.last_name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="position">Position</label>
+                            <input type="text" class="form-control" id="position" name="position" value="{{ staff.position }}" required>
+                            <small class="form-text text-muted">e.g., Nurse, Receptionist, Lab Technician</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h4 class="mb-3">Contact Information</h4>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ staff.phone }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <textarea class="form-control" id="address" name="address" rows="3" required>{{ staff.address }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Update Staff Member</button>
+                    <a href="{% url 'view_staffs' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Password validation
+let passwordTimeout;
+const passwordInput = document.getElementById('password');
+const passwordFeedback = document.getElementById('password-feedback');
+const passwordStatus = document.getElementById('password-status');
+
+passwordInput.addEventListener('input', function() {
+    clearTimeout(passwordTimeout);
+    const password = this.value;
+    
+    // Reset validation state
+    this.setCustomValidity('');
+    passwordFeedback.className = 'form-text';
+    passwordStatus.className = 'fas';
+    
+    // If empty, it's valid (keeping current password)
+    if (!password) {
+        passwordFeedback.textContent = '';
+        passwordStatus.className = '';
+        this.setCustomValidity('');
+        return;
+    }
+    
+    // Password length validation
+    if (password.length < 8) {
+        passwordFeedback.textContent = 'Password must be at least 8 characters long';
+        passwordFeedback.className = 'form-text text-danger';
+        passwordStatus.className = 'fas fa-times text-danger';
+        this.setCustomValidity('Password must be at least 8 characters long');
+        return;
+    }
+    
+    // Check for password strength
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    let strength = 0;
+    let feedback = [];
+    
+    if (hasUpperCase) strength++;
+    else feedback.push('uppercase letter');
+    
+    if (hasLowerCase) strength++;
+    else feedback.push('lowercase letter');
+    
+    if (hasNumbers) strength++;
+    else feedback.push('number');
+    
+    if (hasSpecialChar) strength++;
+    else feedback.push('special character');
+    
+    if (strength < 4) {
+        const missing = feedback.join(', ');
+        passwordFeedback.textContent = `Password must include at least one ${missing}`;
+        passwordFeedback.className = 'form-text text-warning';
+        passwordStatus.className = 'fas fa-exclamation-triangle text-warning';
+        this.setCustomValidity(`Password must include at least one ${missing}`);
+    } else {
+        passwordFeedback.textContent = 'Password strength: Strong';
+        passwordFeedback.className = 'form-text text-success';
+        passwordStatus.className = 'fas fa-check text-success';
+        this.setCustomValidity('');
+    }
+});
+</script>
+{% endblock %}

@@ -12,7 +12,14 @@
                 <div class="card-header">
                     <h4 class="mb-0">Profile Information</h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body text-center">
+                    <div class="profile-picture-container mb-4">
+                        {% if user.doctor.profile_picture %}
+                            <img src="{{ user.doctor.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
+                        {% else %}
+                            <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture" class="profile-picture">
+                        {% endif %}
+                    </div>
                     <h5 class="card-title">Dr. {{ user.get_full_name }}</h5>
                     <p class="card-text"><strong>Specialization:</strong> {{ user.doctor.specialization }}</p>
                     <p class="card-text"><strong>Email:</strong> {{ user.email }}</p>
@@ -252,57 +259,70 @@ function updateAppointmentStatus(appointmentId, status) {
         } else {
             alert('Error updating appointment status');
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating appointment status');
     });
 }
 
 function addMedicalRecord(patientId) {
-    $('#recordModalTitle').text('Add Medical Record');
-    $('#recordForm')[0].reset();
-    $('#recordId').val('');
-    $('#patientId').val(patientId);
+    document.getElementById('recordForm').reset();
+    document.getElementById('recordId').value = '';
+    document.getElementById('patientId').value = patientId;
+    document.getElementById('recordModalTitle').textContent = 'Add Medical Record';
     $('#recordModal').modal('show');
 }
 
 function editRecord(recordId) {
-    $('#recordModalTitle').text('Edit Medical Record');
     fetch(`/get-record-details/${recordId}/`)
-        .then(response => response.json())
-        .then(data => {
-            $('#recordId').val(recordId);
-            $('#category').val(data.category);
-            $('#diagnosis').val(data.diagnosis);
-            $('#prescription').val(data.prescription);
-            $('#notes').val(data.notes);
-            $('#status').val(data.status);
-            $('#recordModal').modal('show');
-        });
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('recordId').value = recordId;
+        document.getElementById('patientId').value = data.patient_id;
+        document.getElementById('category').value = data.category;
+        document.getElementById('diagnosis').value = data.diagnosis;
+        document.getElementById('prescription').value = data.prescription;
+        document.getElementById('notes').value = data.notes;
+        document.getElementById('status').value = data.status;
+        document.getElementById('recordModalTitle').textContent = 'Edit Medical Record';
+        $('#recordModal').modal('show');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error loading record details');
+    });
 }
 
 function viewRecord(recordId) {
     fetch(`/get-record-details/${recordId}/`)
-        .then(response => response.json())
-        .then(data => {
-            $('#viewPatientName').text(data.patient_name);
-            $('#viewDoctorName').text(data.doctor_name);
-            $('#viewDate').text(data.date);
-            $('#viewCategory').text(data.category);
-            $('#viewDiagnosis').text(data.diagnosis);
-            $('#viewPrescription').text(data.prescription);
-            $('#viewNotes').text(data.notes);
-            $('#viewStatus').text(data.status);
-            $('#viewRecordModal').modal('show');
-        });
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('viewPatientName').textContent = data.patient_name;
+        document.getElementById('viewDoctorName').textContent = data.doctor_name;
+        document.getElementById('viewDate').textContent = data.created_at;
+        document.getElementById('viewCategory').textContent = data.category;
+        document.getElementById('viewDiagnosis').textContent = data.diagnosis;
+        document.getElementById('viewPrescription').textContent = data.prescription;
+        document.getElementById('viewNotes').textContent = data.notes || 'No additional notes';
+        document.getElementById('viewStatus').textContent = data.status;
+        $('#viewRecordModal').modal('show');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error loading record details');
+    });
 }
 
 function saveRecord() {
-    const recordId = $('#recordId').val();
+    const recordId = document.getElementById('recordId').value;
     const data = {
-        patient: $('#patientId').val(),
-        category: $('#category').val(),
-        diagnosis: $('#diagnosis').val(),
-        prescription: $('#prescription').val(),
-        notes: $('#notes').val(),
-        status: $('#status').val()
+        patient: document.getElementById('patientId').value,
+        category: document.getElementById('category').value,
+        diagnosis: document.getElementById('diagnosis').value,
+        prescription: document.getElementById('prescription').value,
+        notes: document.getElementById('notes').value,
+        status: document.getElementById('status').value
     };
 
     const url = recordId ? `/update-record/${recordId}/` : '/add-record/';
@@ -321,8 +341,12 @@ function saveRecord() {
             $('#recordModal').modal('hide');
             location.reload();
         } else {
-            alert('Error saving record');
+            alert(data.error || 'Error saving record');
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error saving record');
     });
 }
 
@@ -345,61 +369,40 @@ function getCookie(name) {
 
 {% block extra_css %}
 <style>
-.card {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    margin-bottom: 1.5rem;
+.profile-picture-container {
+    position: relative;
+    display: inline-block;
 }
-
-.card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
-
-.badge {
-    padding: 0.5em 0.75em;
-}
-
 .badge-pending {
     background-color: #ffc107;
     color: #000;
 }
-
 .badge-confirmed {
     background-color: #28a745;
-    color: #fff;
 }
-
-.badge-cancelled {
-    background-color: #dc3545;
-    color: #fff;
-}
-
 .badge-completed {
     background-color: #17a2b8;
-    color: #fff;
 }
-
+.badge-cancelled {
+    background-color: #dc3545;
+}
 .badge-active {
     background-color: #28a745;
-    color: #fff;
 }
-
-.badge-follow-up {
-    background-color: #007bff;
-    color: #fff;
+.badge-completed {
+    background-color: #6c757d;
 }
-
-.btn-sm {
-    margin-right: 0.25rem;
-}
-
-.table th {
-    font-weight: 600;
-    color: #495057;
-}
-
-.modal-lg {
-    max-width: 800px;
+.badge-follow-up-required {
+    background-color: #ffc107;
+    color: #000;
 }
 </style>
 {% endblock %}

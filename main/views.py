@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .models import Doctor, Staff, Patient, Appointment, Record
+from .models import Doctor, Staff, Patient, Appointment, Record, AdminProfile, AdminProfile
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import PasswordChangeForm
 from functools import wraps
@@ -13,6 +13,8 @@ from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.conf import settings
+from .forms import AdminProfileForm
 
 def admin_required(view_func):
     @wraps(view_func)
@@ -78,13 +80,28 @@ def admin_login(request):
         user = authenticate(username=username, password=password)
         if user is not None and user.is_staff:
             login(request, user)
+            # Get or create AdminProfile
+            admin_profile, created = AdminProfile.objects.get_or_create(user=user)
             return redirect('admin_profile')
         messages.error(request, 'Invalid admin credentials')
     return render(request, 'main/AdminLogin.html')
 
 @login_required
 def admin_profile(request):
-    return render(request, 'main/AdminProfile.html')
+    # Get or create AdminProfile
+    admin_profile, created = AdminProfile.objects.get_or_create(user=request.user)
+    
+    doctor_count = Doctor.objects.count()
+    staff_count = Staff.objects.count()
+    patient_count = Patient.objects.count()
+    
+    context = {
+        'admin_profile': admin_profile,
+        'doctor_count': doctor_count,
+        'staff_count': staff_count,
+        'patient_count': patient_count,
+    }
+    return render(request, 'main/AdminProfile.html', context)
 
 @login_required
 def patient_profile(request):
@@ -103,37 +120,174 @@ def patient_profile(request):
 
 @login_required
 def edit_profile(request):
-    if request.method == 'POST':
-        user = request.user
-        user.first_name = request.POST.get('first_name')
-        user.last_name = request.POST.get('last_name')
-        user.email = request.POST.get('email')
-        user.save()
+    if request.user.is_staff:
+        admin_profile, created = AdminProfile.objects.get_or_create(user=request.user)
+        if request.method == 'POST':
+            form = AdminProfileForm(request.POST, request.FILES, instance=admin_profile, user=request.user)
+            if form.is_valid():
+                try:
+                    form.save(user=request.user)
+                    messages.success(request, 'Profile updated successfully')
+                    return redirect('admin_profile')
+                except Exception as e:
+                    messages.error(request, f'Error updating profile: {str(e)}')
+            else:
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f'{field}: {error}')
+        else:
+            form = AdminProfileForm(instance=admin_profile, user=request.user)
+        return render(request, 'main/EditProfile.html', {'form': form})
+    elif hasattr(request.user, 'patient'):
+        import traceback
+        import sys
+        import os
 
-        if hasattr(user, 'patient'):
-            patient = user.patient
-            patient.phone = request.POST.get('phone')
-            patient.address = request.POST.get('address')
-            patient.date_of_birth = request.POST.get('date_of_birth')
-            patient.save()
-            messages.success(request, 'Profile updated successfully')
-            return redirect('patient_profile')
-        elif hasattr(user, 'doctor'):
-            doctor = user.doctor
-            doctor.phone = request.POST.get('phone')
-            doctor.address = request.POST.get('address')
-            doctor.specialization = request.POST.get('specialization')
-            doctor.save()
-            messages.success(request, 'Profile updated successfully')
-            return redirect('doctor_profile')
-        elif hasattr(user, 'staff'):
-            staff = user.staff
-            staff.phone = request.POST.get('phone')
-            staff.address = request.POST.get('address')
-            staff.position = request.POST.get('position')
-            staff.save()
-            messages.success(request, 'Profile updated successfully')
-            return redirect('staff_profile')
+        print("\n=== Edit Profile Debug Information ===")
+        print(f"Request method: {request.method}")
+        print(f"User: {request.user.username} (is_staff: {request.user.is_staff})")
+        print(f"Current working directory: {os.getcwd()}")
+        print(f"MEDIA_ROOT: {settings.MEDIA_ROOT}")
+        
+        # Get or create AdminProfile for staff users
+        if request.user.is_staff:
+            admin_profile, created = AdminProfile.objects.get_or_create(user=request.user)
+            print(f"\nAdminProfile Debug:")
+            print(f"- Created: {created}")
+            print(f"- Current profile: {admin_profile.__dict__}")
+            print(f"- Has profile picture: {bool(admin_profile.profile_picture)}")
+            if admin_profile.profile_picture:
+                print(f"- Profile picture path: {admin_profile.profile_picture.path}")
+                print(f"- Profile picture URL: {admin_profile.profile_picture.url}")
+        
+        if request.method == 'POST':
+            try:
+                print("\nPOST Request Debug:")
+                print(f"Files: {request.FILES}")
+                print(f"POST data: {request.POST}")
+                
+                user = request.user
+                print("\nUser Update Debug:")
+                print(f"- Before update: {user.__dict__}")
+                user.first_name = request.POST.get('first_name')
+                user.last_name = request.POST.get('last_name')
+                user.email = request.POST.get('email')
+                user.save()
+                print(f"- After update: {user.__dict__}")
+
+                # Handle profile picture upload
+                profile_picture = request.FILES.get('profile_picture')
+                print(f"\nProfile Picture Debug:")
+                print(f"- New picture provided: {bool(profile_picture)}")
+                if profile_picture:
+                    print(f"- Picture name: {profile_picture.name}")
+                    print(f"- Picture size: {profile_picture.size}")
+                    print(f"- Picture content type: {profile_picture.content_type}")
+
+                if user.is_staff:
+                    print("\nAdmin Profile Update Debug:")
+                    admin_profile, created = AdminProfile.objects.get_or_create(user=user)
+                    print(f"- Before update: {admin_profile.__dict__}")
+                    
+                    # Get and validate phone and address
+                    phone = request.POST.get('phone')
+                    address = request.POST.get('address')
+                    print(f"- New phone: {phone}")
+                    print(f"- New address: {address}")
+                    
+                    admin_profile.phone = phone
+                    admin_profile.address = address
+                    
+                    if profile_picture:
+                        print("- Handling profile picture:")
+                        if admin_profile.profile_picture:
+                            try:
+                                old_path = admin_profile.profile_picture.path
+                                print(f"  - Deleting old picture: {old_path}")
+                                admin_profile.profile_picture.delete(save=False)
+                                print("  - Old picture deleted successfully")
+                            except Exception as e:
+                                print(f"  - Error deleting old picture: {str(e)}")
+                                print(f"  - Error traceback: {traceback.format_exc()}")
+                        
+                        print("  - Setting new picture")
+                        admin_profile.profile_picture = profile_picture
+                    
+                    try:
+                        admin_profile.save()
+                        print("- Profile saved successfully")
+                        print(f"- After update: {admin_profile.__dict__}")
+                    except Exception as e:
+                        print(f"- Error saving profile: {str(e)}")
+                        print(f"- Error traceback: {traceback.format_exc()}")
+                        raise
+                    
+                    messages.success(request, 'Profile updated successfully')
+                    return redirect('admin_profile')
+                elif hasattr(user, 'patient'):
+                    print("Updating patient profile")
+                    patient = user.patient
+                    patient.phone = request.POST.get('phone')
+                    patient.address = request.POST.get('address')
+                    patient.date_of_birth = request.POST.get('date_of_birth')
+                    if profile_picture:
+                        print("Saving profile picture for patient")
+                        # Delete old profile picture if it exists
+                        if patient.profile_picture:
+                            print("Deleting old profile picture:", patient.profile_picture.path)
+                            try:
+                                patient.profile_picture.delete(save=False)
+                            except Exception as e:
+                                print("Error deleting old profile picture:", str(e))
+                        patient.profile_picture = profile_picture
+                    patient.save()
+                    print("Patient profile saved")
+                    messages.success(request, 'Profile updated successfully')
+                    return redirect('patient_profile')
+                elif hasattr(user, 'doctor'):
+                    print("Updating doctor profile")
+                    doctor = user.doctor
+                    doctor.phone = request.POST.get('phone')
+                    doctor.address = request.POST.get('address')
+                    doctor.specialization = request.POST.get('specialization')
+                    if profile_picture:
+                        print("Saving profile picture for doctor")
+                        # Delete old profile picture if it exists
+                        if doctor.profile_picture:
+                            print("Deleting old profile picture:", doctor.profile_picture.path)
+                            try:
+                                doctor.profile_picture.delete(save=False)
+                            except Exception as e:
+                                print("Error deleting old profile picture:", str(e))
+                        doctor.profile_picture = profile_picture
+                    doctor.save()
+                    print("Doctor profile saved")
+                    messages.success(request, 'Profile updated successfully')
+                    return redirect('doctor_profile')
+                elif hasattr(user, 'staff'):
+                    print("Updating staff profile")
+                    staff = user.staff
+                    staff.phone = request.POST.get('phone')
+                    staff.address = request.POST.get('address')
+                    staff.position = request.POST.get('position')
+                    if profile_picture:
+                        print("Saving profile picture for staff")
+                        # Delete old profile picture if it exists
+                        if staff.profile_picture:
+                            print("Deleting old profile picture:", staff.profile_picture.path)
+                            try:
+                                staff.profile_picture.delete(save=False)
+                            except Exception as e:
+                                print("Error deleting old profile picture:", str(e))
+                        staff.profile_picture = profile_picture
+                    staff.save()
+                    print("Staff profile saved")
+                    messages.success(request, 'Profile updated successfully')
+                    return redirect('staff_profile')
+            except Exception as e:
+                print("Error in edit_profile:", str(e))
+                messages.error(request, f'Error updating profile: {str(e)}')
+                return render(request, 'main/EditProfile.html')
     
     return render(request, 'main/EditProfile.html')
 

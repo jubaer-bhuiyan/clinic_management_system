@@ -125,3 +125,141 @@ body {
     border: none;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
+/* Profile Picture Styles */
+.profile-picture-container {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMTUwIDE1MCI+CiAgPGNpcmNsZSBjeD0iNzUiIGN5PSI3NSIgcj0iNzUiIGZpbGw9IiNlOWVjZWYiLz4KICA8Y2lyY2xlIGN4PSI3NSIgY3k9IjYwIiByPSIyNSIgZmlsbD0iI2FkYjViZCIvPgogIDxwYXRoIGQ9Ik0yNSAxMjBjMC0yNy42MTQgMjIuMzg2LTUwIDUwLTUwczUwIDIyLjM4NiA1MCA1MCIgZmlsbD0iI2FkYjViZCIvPgo8L3N2Zz4=');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Badge Colors */
+.badge-pending {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.badge-confirmed {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.badge-completed {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.badge-cancelled {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.badge-active {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.badge-follow-up-required {
+    background-color: #ffc107;
+    color: #000;
+}
+
+/* Card Styles */
+.profile-card, .action-card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background-color: #87ceeb;
+    color: white;
+}
+
+/* Button Styles */
+.btn-block {
+    width: 100%;
+}
+
+/* Table Styles */
+.table td {
+    vertical-align: middle;
+}
+
+/* Profile Picture Upload */
+.profile-picture-upload {
+    margin-top: 10px;
+}
+
+.profile-picture-upload label {
+    cursor: pointer;
+}
+
+.profile-picture-upload input[type="file"] {
+    display: none;
+}
+
+/* Profile Sections */
+.patient-profile,
+.doctor-profile,
+.staff-profile {
+    padding: 2rem 0;
+}
+
+/* Link Styles */
+.btn-link {
+    color: #004085;
+    text-decoration: none;
+}
+
+.btn-link:hover {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+/* Modal Styles */
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Form Styles */
+.form-group label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* Responsive Tables */
+.table-responsive {
+    margin-bottom: 1rem;
+    border-radius: .25rem;
+}
+
+/* Status Colors */
+.text-pending { color: #ffc107; }
+.text-confirmed { color: #28a745; }
+.text-completed { color: #17a2b8; }
+.text-cancelled { color: #dc3545; }
+.text-active { color: #28a745; }
+.text-follow-up { color: #ffc107; }

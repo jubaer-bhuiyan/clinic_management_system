@@ -22,12 +22,26 @@
                     <div class="col-md-6">
                         <h4 class="mb-3">Account Information</h4>
                         <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" value="{{ doctor.user.username }}" readonly>
+                            <small class="form-text text-muted">Username cannot be changed.</small>
+                        </div>
+                        <div class="form-group">
                             <label for="email">Email</label>
                             <input type="email" class="form-control" id="email" name="email" value="{{ doctor.user.email }}" required>
                         </div>
                         <div class="form-group">
                             <label for="password">New Password (leave blank to keep current)</label>
-                            <input type="password" class="form-control" id="password" name="password">
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">
+                                        <i id="password-status" class="fas"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <small id="password-feedback" class="form-text"></small>
+                            <small class="form-text text-muted">If changing, password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.</small>
                         </div>
                     </div>
                     
@@ -88,5 +102,72 @@
         });
     }, false);
 })();
+
+
+let passwordTimeout;
+const passwordInput = document.getElementById('password');
+const passwordFeedback = document.getElementById('password-feedback');
+const passwordStatus = document.getElementById('password-status');
+
+passwordInput.addEventListener('input', function() {
+    clearTimeout(passwordTimeout);
+    const password = this.value;
+    
+    // Reset validation state
+    this.setCustomValidity('');
+    passwordFeedback.className = 'form-text';
+    passwordStatus.className = 'fas';
+    
+    // If empty, it's valid (keeping current password)
+    if (!password) {
+        passwordFeedback.textContent = '';
+        passwordStatus.className = '';
+        this.setCustomValidity('');
+        return;
+    }
+    
+    // Password length validation
+    if (password.length < 8) {
+        passwordFeedback.textContent = 'Password must be at least 8 characters long';
+        passwordFeedback.className = 'form-text text-danger';
+        passwordStatus.className = 'fas fa-times text-danger';
+        this.setCustomValidity('Password must be at least 8 characters long');
+        return;
+    }
+    
+    // Check for password strength
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    let strength = 0;
+    let feedback = [];
+    
+    if (hasUpperCase) strength++;
+    else feedback.push('uppercase letter');
+    
+    if (hasLowerCase) strength++;
+    else feedback.push('lowercase letter');
+    
+    if (hasNumbers) strength++;
+    else feedback.push('number');
+    
+    if (hasSpecialChar) strength++;
+    else feedback.push('special character');
+    
+    if (strength < 4) {
+        const missing = feedback.join(', ');
+        passwordFeedback.textContent = `Password must include at least one ${missing}`;
+        passwordFeedback.className = 'form-text text-warning';
+        passwordStatus.className = 'fas fa-exclamation-triangle text-warning';
+        this.setCustomValidity(`Password must include at least one ${missing}`);
+    } else {
+        passwordFeedback.textContent = 'Password strength: Strong';
+        passwordFeedback.className = 'form-text text-success';
+        passwordStatus.className = 'fas fa-check text-success';
+        this.setCustomValidity('');
+    }
+});
 </script>
 {% endblock %} 

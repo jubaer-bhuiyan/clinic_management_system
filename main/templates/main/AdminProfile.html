@@ -5,8 +5,71 @@
 
 {% block content %}
 <div class="admin-dashboard">
-  <h2 class="mb-4">Admin Dashboard</h2>
-  
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Admin Profile</h5>
+        </div>
+        <div class="card-body text-center">
+          <div class="profile-picture-container mb-4">
+            {% if admin_profile.profile_picture %}
+              <img src="{{ admin_profile.profile_picture.url }}?v={{ admin_profile.profile_picture.name|urlencode }}" alt="Profile Picture" class="profile-picture">
+            {% else %}
+              <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture" class="profile-picture">
+            {% endif %}
+          </div>
+          <h4>{{ user.get_full_name }}</h4>
+          <p class="text-muted">Administrator</p>
+          {% if admin_profile.phone or admin_profile.address %}
+            <div class="contact-info mt-3">
+              {% if admin_profile.phone %}
+                <p><strong>Phone:</strong> {{ admin_profile.phone }}</p>
+              {% endif %}
+              {% if admin_profile.address %}
+                <p><strong>Address:</strong> {{ admin_profile.address }}</p>
+              {% endif %}
+            </div>
+          {% endif %}
+          <div class="mt-3">
+            <a href="{% url 'edit_profile' %}" class="btn btn-primary btn-sm">Edit Profile</a>
+            <a href="{% url 'change_password' %}" class="btn btn-outline-primary btn-sm">Change Password</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">System Overview</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="text-center mb-3">
+                <h3>{{ doctor_count }}</h3>
+                <p class="text-muted mb-0">Doctors</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center mb-3">
+                <h3>{{ staff_count }}</h3>
+                <p class="text-muted mb-0">Staff Members</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center mb-3">
+                <h3>{{ patient_count }}</h3>
+                <p class="text-muted mb-0">Patients</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   {% if messages %}
     {% for message in messages %}
       <div class="alert alert-{{ message.tags }}">{{ message }}</div>
@@ -21,8 +84,12 @@
         </div>
         <div class="card-body">
           <div class="list-group">
-            <a href="{% url 'add_doctor' %}" class="list-group-item list-group-item-action">Add New Doctor</a>
-            <a href="{% url 'view_doctors' %}" class="list-group-item list-group-item-action">View All Doctors</a>
+            <a href="{% url 'add_doctor' %}" class="list-group-item list-group-item-action">
+              <i class="fas fa-user-md mr-2"></i>Add New Doctor
+            </a>
+            <a href="{% url 'view_doctors' %}" class="list-group-item list-group-item-action">
+              <i class="fas fa-list mr-2"></i>View All Doctors
+            </a>
           </div>
         </div>
       </div>
@@ -35,8 +102,12 @@
         </div>
         <div class="card-body">
           <div class="list-group">
-            <a href="{% url 'add_staff' %}" class="list-group-item list-group-item-action">Add New Staff</a>
-            <a href="{% url 'view_staffs' %}" class="list-group-item list-group-item-action">View All Staff</a>
+            <a href="{% url 'add_staff' %}" class="list-group-item list-group-item-action">
+              <i class="fas fa-user-plus mr-2"></i>Add New Staff
+            </a>
+            <a href="{% url 'view_staffs' %}" class="list-group-item list-group-item-action">
+              <i class="fas fa-users mr-2"></i>View All Staff
+            </a>
           </div>
         </div>
       </div>
@@ -49,8 +120,12 @@
         </div>
         <div class="card-body">
           <div class="list-group">
-            <a href="{% url 'manage_patient_profile' %}" class="list-group-item list-group-item-action">Manage Patient Profiles</a>
-            <a href="{% url 'view_record' %}" class="list-group-item list-group-item-action">View Medical Records</a>
+            <a href="{% url 'manage_patient_profile' %}" class="list-group-item list-group-item-action">
+              <i class="fas fa-user-edit mr-2"></i>Manage Patient Profiles
+            </a>
+            <a href="{% url 'view_record' %}" class="list-group-item list-group-item-action">
+              <i class="fas fa-file-medical mr-2"></i>View Medical Records
+            </a>
           </div>
         </div>
       </div>
@@ -65,8 +140,12 @@
         </div>
         <div class="card-body">
           <div class="list-group">
-            <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action">Change Password</a>
-            <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">Logout</a>
+            <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action">
+              <i class="fas fa-key mr-2"></i>Change Password
+            </a>
+            <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">
+              <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </a>
           </div>
         </div>
       </div>
@@ -78,6 +157,8 @@
 <style>
   .admin-dashboard .card {
     transition: transform 0.2s;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   }
   .admin-dashboard .card:hover {
     transform: translateY(-5px);
@@ -88,13 +169,44 @@
     margin-bottom: 0.5rem;
     border-radius: 0.25rem;
     background-color: #f8f9fa;
+    transition: all 0.2s;
   }
   .admin-dashboard .list-group-item:hover {
     background-color: #e9ecef;
+    transform: translateX(5px);
   }
   .admin-dashboard .text-danger:hover {
     background-color: #dc3545 !important;
     color: white !important;
+  }
+  .admin-dashboard h3 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .card-header {
+    background-color: #87ceeb;
+    color: white;
+    border-bottom: none;
+  }
+  .profile-picture-container {
+    position: relative;
+    display: inline-block;
+  }
+  .profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .contact-info {
+    border-top: 1px solid #eee;
+    padding-top: 1rem;
+  }
+  .contact-info p {
+    margin-bottom: 0.5rem;
   }
 </style>
 {% endblock %}

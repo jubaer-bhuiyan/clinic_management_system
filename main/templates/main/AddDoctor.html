@@ -23,11 +23,29 @@
                         <h4 class="mb-3">Account Information</h4>
                         <div class="form-group">
                             <label for="username">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="username" name="username" required minlength="3" maxlength="30" pattern="^[a-zA-Z0-9_]+$">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">
+                                        <i id="username-status" class="fas"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <small id="username-feedback" class="form-text"></small>
+                            <small class="form-text text-muted">Username can only contain letters, numbers, and underscores.</small>
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" required minlength="8">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">
+                                        <i id="password-status" class="fas"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <small id="password-feedback" class="form-text"></small>
+                            <small class="form-text text-muted">Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.</small>
                         </div>
                         <div class="form-group">
                             <label for="email">Email</label>
@@ -92,5 +110,142 @@
         });
     }, false);
 })();
+
+// Username validation
+let usernameTimeout;
+const usernameInput = document.getElementById('username');
+const usernameFeedback = document.getElementById('username-feedback');
+const usernameStatus = document.getElementById('username-status');
+
+usernameInput.addEventListener('input', function() {
+    clearTimeout(usernameTimeout);
+    const username = this.value;
+    
+    // Reset validation state
+    this.setCustomValidity('');
+    usernameFeedback.className = 'form-text';
+    usernameStatus.className = 'fas';
+    
+    // Basic validation
+    if (!username) {
+        usernameFeedback.textContent = 'Username is required';
+        usernameFeedback.className = 'form-text text-danger';
+        usernameStatus.className = 'fas fa-times text-danger';
+        this.setCustomValidity('Username is required');
+        return;
+    }
+    
+    if (username.length < 3) {
+        usernameFeedback.textContent = 'Username must be at least 3 characters long';
+        usernameFeedback.className = 'form-text text-danger';
+        usernameStatus.className = 'fas fa-times text-danger';
+        this.setCustomValidity('Username must be at least 3 characters long');
+        return;
+    }
+    
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        usernameFeedback.textContent = 'Username can only contain letters, numbers, and underscores';
+        usernameFeedback.className = 'form-text text-danger';
+        usernameStatus.className = 'fas fa-times text-danger';
+        this.setCustomValidity('Username can only contain letters, numbers, and underscores');
+        return;
+    }
+    
+    // Show checking status
+    usernameFeedback.textContent = 'Checking availability...';
+    usernameFeedback.className = 'form-text text-muted';
+    usernameStatus.className = 'fas fa-spinner fa-spin';
+    
+    // Check username availability after a short delay
+    usernameTimeout = setTimeout(() => {
+        fetch(`/check-username/?username=${encodeURIComponent(username)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.available) {
+                    usernameFeedback.textContent = 'Username is available';
+                    usernameFeedback.className = 'form-text text-success';
+                    usernameStatus.className = 'fas fa-check text-success';
+                    this.setCustomValidity('');
+                } else {
+                    usernameFeedback.textContent = 'Username is already taken';
+                    usernameFeedback.className = 'form-text text-danger';
+                    usernameStatus.className = 'fas fa-times text-danger';
+                    this.setCustomValidity('Username is already taken');
+                }
+            })
+            .catch(error => {
+                usernameFeedback.textContent = 'Error checking username availability';
+                usernameFeedback.className = 'form-text text-danger';
+                usernameStatus.className = 'fas fa-exclamation-triangle text-warning';
+            });
+    }, 500);
+});
+
+// Password validation
+let passwordTimeout;
+const passwordInput = document.getElementById('password');
+const passwordFeedback = document.getElementById('password-feedback');
+const passwordStatus = document.getElementById('password-status');
+
+passwordInput.addEventListener('input', function() {
+    clearTimeout(passwordTimeout);
+    const password = this.value;
+    
+    // Reset validation state
+    this.setCustomValidity('');
+    passwordFeedback.className = 'form-text';
+    passwordStatus.className = 'fas';
+    
+    // Basic validation
+    if (!password) {
+        passwordFeedback.textContent = 'Password is required';
+        passwordFeedback.className = 'form-text text-danger';
+        passwordStatus.className = 'fas fa-times text-danger';
+        this.setCustomValidity('Password is required');
+        return;
+    }
+    
+    if (password.length < 8) {
+        passwordFeedback.textContent = 'Password must be at least 8 characters long';
+        passwordFeedback.className = 'form-text text-danger';
+        passwordStatus.className = 'fas fa-times text-danger';
+        this.setCustomValidity('Password must be at least 8 characters long');
+        return;
+    }
+    
+    // Check for password strength
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    let strength = 0;
+    let feedback = [];
+    
+    if (hasUpperCase) strength++;
+    else feedback.push('uppercase letter');
+    
+    if (hasLowerCase) strength++;
+    else feedback.push('lowercase letter');
+    
+    if (hasNumbers) strength++;
+    else feedback.push('number');
+    
+    if (hasSpecialChar) strength++;
+    else feedback.push('special character');
+    
+    if (strength < 4) {
+        const missing = feedback.join(', ');
+        passwordFeedback.textContent = `Password must include at least one ${missing}`;
+        passwordFeedback.className = 'form-text text-warning';
+        passwordStatus.className = 'fas fa-exclamation-triangle text-warning';
+        this.setCustomValidity(`Password must include at least one ${missing}`);
+    } else {
+        passwordFeedback.textContent = 'Password strength: Strong';
+        passwordFeedback.className = 'form-text text-success';
+        passwordStatus.className = 'fas fa-check text-success';
+        this.setCustomValidity('');
+    }
+});
 </script>
 {% endblock %}

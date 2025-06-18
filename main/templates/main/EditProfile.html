@@ -4,133 +4,191 @@
 {% block title %}Edit Profile - Clinic Management System{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="mb-0">Edit Profile</h2>
+        <div class="col-md-10">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0 text-center">Edit Profile</h3>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-5">
                     {% if messages %}
                         {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
                         {% endfor %}
                     {% endif %}
 
-                    <form method="post" class="needs-validation" novalidate>
+                    <form method="post" class="needs-validation" novalidate enctype="multipart/form-data">
                         {% csrf_token %}
                         
-                        <div class="row">
+                        <div class="row justify-content-center mb-5">
+                            <div class="col-md-6 text-center">
+                                <div class="profile-picture-container position-relative">
+                                    {% if user.is_staff and user.adminprofile.profile_picture %}
+                                        <img src="{{ user.adminprofile.profile_picture.url }}?v={{ user.adminprofile.profile_picture.name|urlencode }}&t={{ request.GET.t|default:'' }}" 
+                                             alt="Profile Picture" class="profile-picture mb-3" id="profile-preview">
+                                    {% elif user.patient.profile_picture %}
+                                        <img src="{{ user.patient.profile_picture.url }}?v={{ user.patient.profile_picture.name|urlencode }}&t={{ request.GET.t|default:'' }}" 
+                                             alt="Profile Picture" class="profile-picture mb-3" id="profile-preview">
+                                    {% elif user.doctor.profile_picture %}
+                                        <img src="{{ user.doctor.profile_picture.url }}?v={{ user.doctor.profile_picture.name|urlencode }}&t={{ request.GET.t|default:'' }}" 
+                                             alt="Profile Picture" class="profile-picture mb-3" id="profile-preview">
+                                    {% elif user.staff.profile_picture %}
+                                        <img src="{{ user.staff.profile_picture.url }}?v={{ user.staff.profile_picture.name|urlencode }}&t={{ request.GET.t|default:'' }}" 
+                                             alt="Profile Picture" class="profile-picture mb-3" id="profile-preview">
+                                    {% else %}
+                                        <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture" class="profile-picture mb-3" id="profile-preview">
+                                    {% endif %}
+                                    <div class="profile-picture-upload mt-3">
+                                        <label for="profile_picture" class="btn btn-outline-primary rounded-pill">
+                                            <i class="fas fa-camera me-2"></i>Change Picture
+                                        </label>
+                                        <input type="file" class="d-none" id="profile_picture" name="profile_picture" accept="image/*">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-4">
                             <div class="col-md-6">
-                                <h4 class="mb-3">Account Information</h4>
-                                <div class="form-group">
-                                    <label for="email">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" 
-                                           value="{{ user.email }}" required>
-                                    <div class="invalid-feedback">
-                                        Please provide a valid email.
+                                <div class="card h-100 border-0 bg-light">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-4">
+                                            <div class="icon-circle bg-primary-light me-3">
+                                                <i class="fas fa-user-circle text-primary"></i>
+                                            </div>
+                                            <h4 class="card-title mb-0">Account Information</h4>
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <input type="email" class="form-control custom-input" id="email" name="email" 
+                                                   value="{{ user.email }}" required placeholder="Email">
+                                            <label for="email">Email Address</label>
+                                            <div class="invalid-feedback">
+                                                Please provide a valid email address.
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="col-md-6">
-                                <h4 class="mb-3">Personal Information</h4>
-                                <div class="form-group">
-                                    <label for="first_name">First Name</label>
-                                    <input type="text" class="form-control" id="first_name" name="first_name" 
-                                           value="{{ user.first_name }}" required>
-                                    <div class="invalid-feedback">
-                                        Please provide your first name.
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="last_name">Last Name</label>
-                                    <input type="text" class="form-control" id="last_name" name="last_name" 
-                                           value="{{ user.last_name }}" required>
-                                    <div class="invalid-feedback">
-                                        Please provide your last name.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mt-3">
-                            <div class="col-md-12">
-                                <h4 class="mb-3">Contact Information</h4>
-                                <div class="form-group">
-                                    <label for="phone">Phone Number</label>
-                                    <input type="tel" class="form-control" id="phone" name="phone" 
-                                           value="{% if user.patient %}{{ user.patient.phone }}{% elif user.doctor %}{{ user.doctor.phone }}{% elif user.staff %}{{ user.staff.phone }}{% endif %}" 
-                                           required>
-                                    <div class="invalid-feedback">
-                                        Please provide a valid phone number.
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="address">Address</label>
-                                    <textarea class="form-control" id="address" name="address" rows="3" required>{% if user.patient %}{{ user.patient.address }}{% elif user.doctor %}{{ user.doctor.address }}{% elif user.staff %}{{ user.staff.address }}{% endif %}</textarea>
-                                    <div class="invalid-feedback">
-                                        Please provide your address.
+                                <div class="card h-100 border-0 bg-light">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-4">
+                                            <div class="icon-circle bg-success-light me-3">
+                                                <i class="fas fa-id-card text-success"></i>
+                                            </div>
+                                            <h4 class="card-title mb-0">Personal Information</h4>
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control custom-input" id="first_name" name="first_name" 
+                                                   value="{{ user.first_name }}" required placeholder="First Name">
+                                            <label for="first_name">First Name</label>
+                                            <div class="invalid-feedback">
+                                                Please provide your first name.
+                                            </div>
+                                        </div>
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control custom-input" id="last_name" name="last_name" 
+                                                   value="{{ user.last_name }}" required placeholder="Last Name">
+                                            <label for="last_name">Last Name</label>
+                                            <div class="invalid-feedback">
+                                                Please provide your last name.
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {% if user.patient %}
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="date_of_birth">Date of Birth</label>
-                                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" 
-                                           value="{{ user.patient.date_of_birth|date:'Y-m-d' }}" required>
-                                    <div class="invalid-feedback">
-                                        Please provide your date of birth.
+                        <style>
+                        .icon-circle {
+                            width: 40px;
+                            height: 40px;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        }
+                        
+                        .bg-primary-light {
+                            background-color: rgba(37, 99, 235, 0.1);
+                        }
+                        
+                        .bg-success-light {
+                            background-color: rgba(16, 185, 129, 0.1);
+                        }
+                        
+                        .text-success {
+                            color: #10b981;
+                        }
+                        
+                        .custom-input {
+                            border: 2px solid #e2e8f0;
+                            transition: all 0.3s ease;
+                        }
+                        
+                        .custom-input:focus {
+                            border-color: #2563eb;
+                            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+                        }
+                        
+                        .custom-input.is-valid {
+                            border-color: #10b981;
+                        }
+                        
+                        .custom-input.is-invalid {
+                            border-color: #ef4444;
+                        }
+                        </style>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body">
+                                        <h4 class="card-title mb-4"><i class="fas fa-address-book me-2"></i>Contact Information</h4>
+                                        <div class="form-floating mb-3">
+                                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                                   value="{% if user.is_staff %}{{ user.adminprofile.phone }}{% elif user.patient %}{{ user.patient.phone }}{% elif user.doctor %}{{ user.doctor.phone }}{% elif user.staff %}{{ user.staff.phone }}{% endif %}" 
+                                                   required placeholder="Phone">
+                                            <label for="phone">Phone Number</label>
+                                            <div class="invalid-feedback">
+                                                Please provide a valid phone number.
+                                            </div>
+                                        </div>
+                                        <div class="form-floating">
+                                            <textarea class="form-control" id="address" name="address" rows="3" style="height: 100px" 
+                                                      required placeholder="Address">{% if user.is_staff %}{{ user.adminprofile.address }}{% elif user.patient %}{{ user.patient.address }}{% elif user.doctor %}{{ user.doctor.address }}{% elif user.staff %}{{ user.staff.address }}{% endif %}</textarea>
+                                            <label for="address">Address</label>
+                                            <div class="invalid-feedback">
+                                                Please provide your address.
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        {% endif %}
 
-                        {% if user.doctor %}
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="specialization">Specialization</label>
-                                    <input type="text" class="form-control" id="specialization" name="specialization" 
-                                           value="{{ user.doctor.specialization }}" required>
-                                    <div class="invalid-feedback">
-                                        Please provide your specialization.
-                                    </div>
-                                </div>
+                        <div class="row mt-5">
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg px-5 me-3">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                {% if user.is_staff %}
+                                    <a href="{% url 'admin_profile' %}" class="btn btn-outline-secondary btn-lg px-5">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                {% elif user.patient %}
+                                    <a href="{% url 'patient_profile' %}" class="btn btn-outline-secondary btn-lg px-5">Cancel</a>
+                                {% elif user.doctor %}
+                                    <a href="{% url 'doctor_profile' %}" class="btn btn-outline-secondary btn-lg px-5">Cancel</a>
+                                {% elif user.staff %}
+                                    <a href="{% url 'staff_profile' %}" class="btn btn-outline-secondary btn-lg px-5">Cancel</a>
+                                {% endif %}
                             </div>
-                        </div>
-                        {% endif %}
-
-                        {% if user.staff %}
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="position">Position</label>
-                                    <input type="text" class="form-control" id="position" name="position" 
-                                           value="{{ user.staff.position }}" required>
-                                    <div class="invalid-feedback">
-                                        Please provide your position.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        <div class="mt-4">
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                            {% if user.patient %}
-                                <a href="{% url 'patient_profile' %}" class="btn btn-secondary">Cancel</a>
-                            {% elif user.doctor %}
-                                <a href="{% url 'doctor_profile' %}" class="btn btn-secondary">Cancel</a>
-                            {% elif user.staff %}
-                                <a href="{% url 'staff_profile' %}" class="btn btn-secondary">Cancel</a>
-                            {% endif %}
                         </div>
                     </form>
                 </div>
@@ -139,39 +197,484 @@
     </div>
 </div>
 
+{% block extra_css %}
+<style>
+:root {
+    --primary: #2563eb;
+    --primary-light: rgba(37, 99, 235, 0.1);
+    --success: #10b981;
+    --success-light: rgba(16, 185, 129, 0.1);
+    --danger: #ef4444;
+    --border-radius: 1rem;
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary), #1d4ed8);
+    border: none;
+    padding: 1.5rem;
+}
+
+.card-header h3 {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Profile Picture */
+.profile-picture-container {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-picture {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.profile-picture:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Form Controls */
+.form-floating {
+    margin-bottom: 1.5rem;
+}
+
+.form-control {
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.25rem 1rem;
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.form-control.is-valid {
+    border-color: var(--success);
+    background-image: none;
+}
+
+.form-control.is-invalid {
+    border-color: var(--danger);
+    background-image: none;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 0.75rem;
+    padding: 0.75rem 2rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), #1d4ed8);
+    border: none;
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--primary);
+    color: var(--primary);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Icons */
+.icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+}
+
+.bg-primary-light {
+    background-color: var(--primary-light);
+}
+
+.bg-success-light {
+    background-color: var(--success-light);
+}
+
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.text-success {
+    color: var(--success) !important;
+}
+
+/* Section Headers */
+.section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #f8fafc;
+    border-radius: 0.75rem;
+}
+
+.section-header h4 {
+    margin: 0;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .profile-picture {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
-// Form validation
+// Enhanced form validation with visual feedback
 (function() {
     'use strict';
+    
+    function showValidationFeedback(input, isValid) {
+        const feedback = input.nextElementSibling;
+        if (feedback && feedback.classList.contains('invalid-feedback')) {
+            feedback.style.display = isValid ? 'none' : 'block';
+            input.classList.toggle('is-valid', isValid);
+            input.classList.toggle('is-invalid', !isValid);
+            
+            // Add shake animation for invalid fields
+            if (!isValid) {
+                input.classList.add('shake');
+                setTimeout(() => input.classList.remove('shake'), 500);
+            }
+        }
+    }
+    
     window.addEventListener('load', function() {
-        var forms = document.getElementsByClassName('needs-validation');
+        const forms = document.getElementsByClassName('needs-validation');
         Array.prototype.filter.call(forms, function(form) {
+            const inputs = form.querySelectorAll('input, textarea');
+            
+            // Add floating label animation
+            inputs.forEach(input => {
+                // Initial state check
+                if (input.value) {
+                    input.classList.add('has-value');
+                }
+                
+                // Input event handlers
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focused');
+                    if (!this.value) {
+                        this.classList.remove('has-value');
+                    }
+                    showValidationFeedback(this, this.checkValidity());
+                });
+                
+                input.addEventListener('input', function() {
+                    if (this.value) {
+                        this.classList.add('has-value');
+                    } else {
+                        this.classList.remove('has-value');
+                    }
+                    showValidationFeedback(this, this.checkValidity());
+                });
+            });
+            
+            // Form submission handler
             form.addEventListener('submit', function(event) {
-                if (form.checkValidity() === false) {
+                if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
+                    
+                    // Show validation feedback for all inputs
+                    inputs.forEach(input => {
+                        showValidationFeedback(input, input.checkValidity());
+                    });
+                    
+                    // Scroll to first invalid input
+                    const firstInvalid = form.querySelector(':invalid');
+                    if (firstInvalid) {
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                 }
                 form.classList.add('was-validated');
             }, false);
         });
     });
 })();
-</script>
-{% endblock %}
 
-{% block extra_css %}
+// Enhanced profile picture preview with drag and drop
+(function() {
+    const dropZone = document.querySelector('.profile-picture-container');
+    const preview = document.getElementById('profile-preview');
+    const fileInput = document.getElementById('profile_picture');
+    
+    // Validate and process file
+    function processFile(file) {
+        // Validate file size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('Please select an image smaller than 5MB', 'error');
+            return false;
+        }
+        
+        // Validate file type
+        if (!file.type.match('image.*')) {
+            showToast('Please select an image file', 'error');
+            return false;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.style.opacity = '0';
+            preview.src = e.target.result;
+            setTimeout(() => {
+                preview.style.opacity = '1';
+                showToast('Profile picture updated successfully', 'success');
+            }, 200);
+        };
+        reader.onerror = function() {
+            showToast('Error reading file', 'error');
+        };
+        reader.readAsDataURL(file);
+        return true;
+    }
+    
+    // File input change handler
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            processFile(file);
+        }
+    });
+    
+    // Drag and drop handlers
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('drag-over');
+    });
+    
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+    });
+    
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+        
+        const file = e.dataTransfer.files[0];
+        if (file && processFile(file)) {
+            fileInput.files = e.dataTransfer.files;
+        }
+    });
+})();
+
+// Toast notification system
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type} fade-in`;
+    toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Auto-resize textarea
+const textarea = document.querySelector('textarea');
+if (textarea) {
+    function autoResize() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight + 2) + 'px';
+    }
+    
+    textarea.addEventListener('input', autoResize);
+    window.addEventListener('load', () => autoResize.call(textarea));
+}
+
+// Smooth alert dismissal
+document.querySelectorAll('.alert').forEach(alert => {
+    const closeBtn = alert.querySelector('.btn-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 300);
+        });
+    }
+});
+</script>
+
 <style>
-.card {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+/* Toast notifications */
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    z-index: 1000;
 }
-.card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+
+.toast-success {
+    border-left: 4px solid #10b981;
 }
-.form-group label {
-    font-weight: 500;
-    color: #495057;
+
+.toast-error {
+    border-left: 4px solid #ef4444;
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.toast i {
+    font-size: 1.25rem;
+}
+
+.toast-success i {
+    color: #10b981;
+}
+
+.toast-error i {
+    color: #ef4444;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(20px); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.3s ease-in-out;
+}
+
+/* Drag and drop */
+.profile-picture-container.drag-over {
+    border: 2px dashed var(--primary);
+    border-radius: 50%;
+}
+
+.profile-picture-container.drag-over .profile-picture {
+    opacity: 0.5;
+}
+
+/* Form focus effects */
+.form-floating.focused label {
+    color: var(--primary);
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+.form-control.has-value + label {
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
 }
 </style>
 {% endblock %}
