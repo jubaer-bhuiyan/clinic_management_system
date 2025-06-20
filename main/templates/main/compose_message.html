@@ -1,0 +1,110 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Compose Message - Clinic Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Compose Message</h2>
+                <a href="{% url 'inbox' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Inbox
+                </a>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="card shadow">
+                <div class="card-body">
+                    {% if not recipients %}
+                        <div class="alert alert-info">
+                            {% if is_patient %}
+                                <p>You don't have any assigned doctors yet. Please book an appointment first to message a doctor.</p>
+                                <a href="{% url 'take_appointment' %}" class="btn btn-primary mt-2">Book Appointment</a>
+                            {% else %}
+                                <p>You don't have any assigned patients yet.</p>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="receiver">To:</label>
+                                <select class="form-control" id="receiver" name="receiver" required>
+                                    <option value="">Select recipient...</option>
+                                    {% for recipient in recipients %}
+                                        <option value="{{ recipient.id }}">
+                                            {% if recipient.doctor %}Dr. {% endif %}
+                                            {{ recipient.get_full_name }}
+                                            {% if recipient.doctor %}
+                                                ({{ recipient.doctor.specialization }})
+                                            {% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="subject">Subject:</label>
+                                <input type="text" class="form-control" id="subject" name="subject" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="content">Message:</label>
+                                <textarea class="form-control" id="content" name="content" rows="6" required></textarea>
+                            </div>
+                            <div class="text-right">
+                                <button type="button" class="btn btn-secondary mr-2" onclick="window.location.href='{% url 'inbox' %}'">Cancel</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane mr-2"></i>Send Message
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+.form-group label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.card {
+    border: none;
+}
+
+.shadow {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.btn {
+    padding: 0.5rem 1.5rem;
+}
+
+.alert {
+    border-radius: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% endblock %}

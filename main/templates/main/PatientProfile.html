@@ -40,11 +40,12 @@
         </div>
         <div class="card-body">
           <a href="{% url 'take_appointment' %}" class="btn btn-primary btn-block mb-2">Book New Appointment</a>
-          <a href="{% url 'available_doctors' %}" class="btn btn-outline-primary btn-block">View Available Doctors</a>
+          <a href="{% url 'available_doctors' %}" class="btn btn-outline-primary btn-block mb-2">View Available Doctors</a>
+          <a href="{% url 'compose_message' %}" class="btn btn-outline-info btn-block">Send Message</a>
         </div>
       </div>
     </div>
-    
+
     <div class="col-md-8">
       <div class="card mb-4">
         <div class="card-header">
@@ -53,7 +54,7 @@
         <div class="card-body">
           {% if appointments %}
             <div class="table-responsive">
-              <table class="table">
+                <table class="table">
                 <thead>
                   <tr>
                     <th>Doctor</th>
@@ -62,7 +63,7 @@
                     <th>Status</th>
                   </tr>
                 </thead>
-                <tbody>
+                    <tbody>
                   {% for appointment in appointments %}
                     <tr>
                       <td>Dr. {{ appointment.doctor.user.get_full_name }}</td>
@@ -71,8 +72,8 @@
                       <td><span class="badge badge-{{ appointment.status|lower }}">{{ appointment.status }}</span></td>
                     </tr>
                   {% endfor %}
-                </tbody>
-              </table>
+                    </tbody>
+                </table>
             </div>
           {% else %}
             <p class="text-muted">No appointments scheduled yet.</p>
@@ -112,9 +113,9 @@
             <p class="text-muted">No medical records available.</p>
           {% endif %}
         </div>
-      </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 {% block extra_css %}

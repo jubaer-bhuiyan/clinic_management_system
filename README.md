@@ -3,11 +3,9 @@
 <div align="center">
 
 [![Django Version](https://img.shields.io/badge/Django-4.2.23-green.svg)](https://www.djangoproject.com/)
-[![Python Version](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![Python Version](https://img.shields.io/badge/Python-3.13+-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)](https://github.com/jubaer-bhuiyan/clinic_management_system/graphs/commit-activity)
-
-<img src="https://raw.githubusercontent.com/jubaer-bhuiyan/clinic_management_system/main/static/img/logo.png" alt="CAMS Logo" width="200"/>
 
 *A modern, comprehensive solution for clinical appointment and healthcare management*
 
@@ -82,13 +80,13 @@ The Clinical Appointment Management System (CAMS) is a sophisticated healthcare 
 
 ### Backend
 - Django 4.2.23
-- Python 3.8+
+- Python 3.13+
 - SQLite3
 - RESTful API
 - Django Forms
 
 ### Security
-- JWT Authentication
+- Django Security Middleware
 - CSRF Protection
 - XSS Prevention
 - SQL Injection Guards
@@ -102,13 +100,13 @@ The Clinical Appointment Management System (CAMS) is a sophisticated healthcare 
 - JavaScript (ES6+)
 - Bootstrap 4.5.2
 - jQuery 3.5.1
-- Client-side Validation
+- Font Awesome 5.15.4
 
 ### Additional
 - python-dateutil 2.8.2
 - Pillow 10.2.0
-- Font Awesome 5.15.4
-- Django Crispy Forms
+- django-crispy-forms 2.1
+- crispy-bootstrap4 2023.1
 
 </td>
 </tr>
@@ -162,7 +160,7 @@ The Clinical Appointment Management System (CAMS) is a sophisticated healthcare 
 ### 👨‍⚕️ Doctor Interface
 - Appointment management
 - Patient records
-- Prescription system
+- Messaging system
 - Schedule management
 - Profile updates with validation
 
@@ -179,8 +177,8 @@ The Clinical Appointment Management System (CAMS) is a sophisticated healthcare 
 ### 👤 Patient Portal
 - Book appointments
 - View medical history
+- Message doctors
 - Track appointments
-- Download reports
 - Profile management with validation
 
 </td>
@@ -198,42 +196,8 @@ The Clinical Appointment Management System (CAMS) is a sophisticated healthcare 
 - Form validation and sanitization
 - Input data verification
 
-## 🌟 Best Practices
+## 📝 License
 
-- PEP 8 coding standards
-- Regular security updates
-- Automated testing
-- Code documentation
-- Performance optimization
-- User data protection
-- Form validation standards
-- Data integrity checks
-
-## 📄 License
-
-**Proprietary Software**  
 Copyright © 2025 Jubaer Ahamed Bhuiyan. All rights reserved.
 
-This software is protected by copyright law. No part of this software may be reproduced, distributed, or transmitted in any form without explicit written permission from the author.
-
-## 👤 Author
-
-<div align="center">
-<img src="https://github.com/jubaer-bhuiyan.png" alt="Author" width="100" style="border-radius: 50%"/>
-
-**Jubaer Ahamed Bhuiyan**  
-Developer & Project Owner
-
-[GitHub](https://github.com/jubaer-bhuiyan) • [LinkedIn](https://linkedin.com/in/jubaer-bhuiyan)
-
-</div>
-
----
-
-<div align="center">
-
-Made with ❤️ by Jubaer Ahamed Bhuiyan
-
-Copyright © 2025. All rights reserved.
-
-</div>
+This software and its documentation are protected by copyright law and international treaties. Unauthorized reproduction or distribution of this software, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under law.

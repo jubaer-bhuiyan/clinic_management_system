@@ -1,19 +1,23 @@
+import json
+from functools import wraps
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .models import Doctor, Staff, Patient, Appointment, Record, AdminProfile, AdminProfile
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import PasswordChangeForm
-from functools import wraps
-from django.utils import timezone
 from django.http import JsonResponse
-import json
 from django.views.decorators.http import require_http_methods
-from django.core.paginator import Paginator
+from django.utils import timezone
 from django.db.models import Q
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.conf import settings
+from django.utils.http import url_has_allowed_host_and_scheme
+
+from .models import (
+    Doctor, Staff, Patient, Appointment, Record, 
+    AdminProfile, PendingRecordChange, Message
+)
 from .forms import AdminProfileForm
 
 def admin_required(view_func):
@@ -94,12 +98,14 @@ def admin_profile(request):
     doctor_count = Doctor.objects.count()
     staff_count = Staff.objects.count()
     patient_count = Patient.objects.count()
+    pending_changes_count = PendingRecordChange.objects.filter(status='pending').count()
     
     context = {
         'admin_profile': admin_profile,
         'doctor_count': doctor_count,
         'staff_count': staff_count,
         'patient_count': patient_count,
+        'pending_changes_count': pending_changes_count,
     }
     return render(request, 'main/AdminProfile.html', context)
 
@@ -138,158 +144,99 @@ def edit_profile(request):
         else:
             form = AdminProfileForm(instance=admin_profile, user=request.user)
         return render(request, 'main/EditProfile.html', {'form': form})
+    
     elif hasattr(request.user, 'patient'):
-        import traceback
-        import sys
-        import os
-
-        print("\n=== Edit Profile Debug Information ===")
-        print(f"Request method: {request.method}")
-        print(f"User: {request.user.username} (is_staff: {request.user.is_staff})")
-        print(f"Current working directory: {os.getcwd()}")
-        print(f"MEDIA_ROOT: {settings.MEDIA_ROOT}")
-        
-        # Get or create AdminProfile for staff users
-        if request.user.is_staff:
-            admin_profile, created = AdminProfile.objects.get_or_create(user=request.user)
-            print(f"\nAdminProfile Debug:")
-            print(f"- Created: {created}")
-            print(f"- Current profile: {admin_profile.__dict__}")
-            print(f"- Has profile picture: {bool(admin_profile.profile_picture)}")
-            if admin_profile.profile_picture:
-                print(f"- Profile picture path: {admin_profile.profile_picture.path}")
-                print(f"- Profile picture URL: {admin_profile.profile_picture.url}")
-        
         if request.method == 'POST':
             try:
-                print("\nPOST Request Debug:")
-                print(f"Files: {request.FILES}")
-                print(f"POST data: {request.POST}")
-                
                 user = request.user
-                print("\nUser Update Debug:")
-                print(f"- Before update: {user.__dict__}")
                 user.first_name = request.POST.get('first_name')
                 user.last_name = request.POST.get('last_name')
                 user.email = request.POST.get('email')
                 user.save()
-                print(f"- After update: {user.__dict__}")
 
-                # Handle profile picture upload
+                patient = user.patient
+                patient.phone = request.POST.get('phone')
+                patient.address = request.POST.get('address')
+                patient.date_of_birth = request.POST.get('date_of_birth')
+                
+                # Handle profile picture
                 profile_picture = request.FILES.get('profile_picture')
-                print(f"\nProfile Picture Debug:")
-                print(f"- New picture provided: {bool(profile_picture)}")
                 if profile_picture:
-                    print(f"- Picture name: {profile_picture.name}")
-                    print(f"- Picture size: {profile_picture.size}")
-                    print(f"- Picture content type: {profile_picture.content_type}")
-
-                if user.is_staff:
-                    print("\nAdmin Profile Update Debug:")
-                    admin_profile, created = AdminProfile.objects.get_or_create(user=user)
-                    print(f"- Before update: {admin_profile.__dict__}")
-                    
-                    # Get and validate phone and address
-                    phone = request.POST.get('phone')
-                    address = request.POST.get('address')
-                    print(f"- New phone: {phone}")
-                    print(f"- New address: {address}")
-                    
-                    admin_profile.phone = phone
-                    admin_profile.address = address
-                    
-                    if profile_picture:
-                        print("- Handling profile picture:")
-                        if admin_profile.profile_picture:
-                            try:
-                                old_path = admin_profile.profile_picture.path
-                                print(f"  - Deleting old picture: {old_path}")
-                                admin_profile.profile_picture.delete(save=False)
-                                print("  - Old picture deleted successfully")
-                            except Exception as e:
-                                print(f"  - Error deleting old picture: {str(e)}")
-                                print(f"  - Error traceback: {traceback.format_exc()}")
-                        
-                        print("  - Setting new picture")
-                        admin_profile.profile_picture = profile_picture
-                    
-                    try:
-                        admin_profile.save()
-                        print("- Profile saved successfully")
-                        print(f"- After update: {admin_profile.__dict__}")
-                    except Exception as e:
-                        print(f"- Error saving profile: {str(e)}")
-                        print(f"- Error traceback: {traceback.format_exc()}")
-                        raise
-                    
-                    messages.success(request, 'Profile updated successfully')
-                    return redirect('admin_profile')
-                elif hasattr(user, 'patient'):
-                    print("Updating patient profile")
-                    patient = user.patient
-                    patient.phone = request.POST.get('phone')
-                    patient.address = request.POST.get('address')
-                    patient.date_of_birth = request.POST.get('date_of_birth')
-                    if profile_picture:
-                        print("Saving profile picture for patient")
-                        # Delete old profile picture if it exists
-                        if patient.profile_picture:
-                            print("Deleting old profile picture:", patient.profile_picture.path)
-                            try:
-                                patient.profile_picture.delete(save=False)
-                            except Exception as e:
-                                print("Error deleting old profile picture:", str(e))
-                        patient.profile_picture = profile_picture
-                    patient.save()
-                    print("Patient profile saved")
-                    messages.success(request, 'Profile updated successfully')
-                    return redirect('patient_profile')
-                elif hasattr(user, 'doctor'):
-                    print("Updating doctor profile")
-                    doctor = user.doctor
-                    doctor.phone = request.POST.get('phone')
-                    doctor.address = request.POST.get('address')
-                    doctor.specialization = request.POST.get('specialization')
-                    if profile_picture:
-                        print("Saving profile picture for doctor")
-                        # Delete old profile picture if it exists
-                        if doctor.profile_picture:
-                            print("Deleting old profile picture:", doctor.profile_picture.path)
-                            try:
-                                doctor.profile_picture.delete(save=False)
-                            except Exception as e:
-                                print("Error deleting old profile picture:", str(e))
-                        doctor.profile_picture = profile_picture
-                    doctor.save()
-                    print("Doctor profile saved")
-                    messages.success(request, 'Profile updated successfully')
-                    return redirect('doctor_profile')
-                elif hasattr(user, 'staff'):
-                    print("Updating staff profile")
-                    staff = user.staff
-                    staff.phone = request.POST.get('phone')
-                    staff.address = request.POST.get('address')
-                    staff.position = request.POST.get('position')
-                    if profile_picture:
-                        print("Saving profile picture for staff")
-                        # Delete old profile picture if it exists
-                        if staff.profile_picture:
-                            print("Deleting old profile picture:", staff.profile_picture.path)
-                            try:
-                                staff.profile_picture.delete(save=False)
-                            except Exception as e:
-                                print("Error deleting old profile picture:", str(e))
-                        staff.profile_picture = profile_picture
-                    staff.save()
-                    print("Staff profile saved")
-                    messages.success(request, 'Profile updated successfully')
-                    return redirect('staff_profile')
+                    if patient.profile_picture:
+                        patient.profile_picture.delete(save=False)
+                    patient.profile_picture = profile_picture
+                
+                patient.save()
+                messages.success(request, 'Profile updated successfully')
+                return redirect('patient_profile')
+                
             except Exception as e:
-                print("Error in edit_profile:", str(e))
                 messages.error(request, f'Error updating profile: {str(e)}')
-                return render(request, 'main/EditProfile.html')
+        
+        return render(request, 'main/EditProfile.html')
     
-    return render(request, 'main/EditProfile.html')
+    elif hasattr(request.user, 'doctor'):
+        if request.method == 'POST':
+            try:
+                user = request.user
+                user.first_name = request.POST.get('first_name')
+                user.last_name = request.POST.get('last_name')
+                user.email = request.POST.get('email')
+                user.save()
+
+                doctor = user.doctor
+                doctor.specialization = request.POST.get('specialization')
+                doctor.phone = request.POST.get('phone')
+                doctor.address = request.POST.get('address')
+                
+                # Handle profile picture
+                profile_picture = request.FILES.get('profile_picture')
+                if profile_picture:
+                    if doctor.profile_picture:
+                        doctor.profile_picture.delete(save=False)
+                    doctor.profile_picture = profile_picture
+                
+                doctor.save()
+                messages.success(request, 'Profile updated successfully')
+                return redirect('doctor_profile')
+                
+            except Exception as e:
+                messages.error(request, f'Error updating profile: {str(e)}')
+        
+        return render(request, 'main/EditProfile.html')
+    
+    elif hasattr(request.user, 'staff'):
+        if request.method == 'POST':
+            try:
+                user = request.user
+                user.first_name = request.POST.get('first_name')
+                user.last_name = request.POST.get('last_name')
+                user.email = request.POST.get('email')
+                user.save()
+
+                staff = user.staff
+                staff.position = request.POST.get('position')
+                staff.phone = request.POST.get('phone')
+                staff.address = request.POST.get('address')
+                
+                # Handle profile picture
+                profile_picture = request.FILES.get('profile_picture')
+                if profile_picture:
+                    if staff.profile_picture:
+                        staff.profile_picture.delete(save=False)
+                    staff.profile_picture = profile_picture
+                
+                staff.save()
+                messages.success(request, 'Profile updated successfully')
+                return redirect('staff_profile')
+                
+            except Exception as e:
+                messages.error(request, f'Error updating profile: {str(e)}')
+        
+        return render(request, 'main/EditProfile.html')
+    
+    messages.error(request, 'Invalid user type')
+    return redirect('home')
 
 @login_required
 def take_appointment(request):
@@ -639,13 +586,29 @@ def add_record(request):
     try:
         data = json.loads(request.body)
         patient = get_object_or_404(Patient, id=data.get('patient'))
-        
-        # If user is a doctor, use their profile
-        if hasattr(request.user, 'doctor'):
-            doctor = request.user.doctor
-        else:
-            doctor = get_object_or_404(Doctor, id=data.get('doctor'))
+        doctor = get_object_or_404(Doctor, id=data.get('doctor'))
 
+        # If user is staff, create pending change
+        if hasattr(request.user, 'staff'):
+            PendingRecordChange.objects.create(
+                staff=request.user.staff,
+                change_type='create',
+                patient=patient,
+                doctor=doctor,
+                changes={
+                    'category': data.get('category', 'General'),
+                    'diagnosis': data.get('diagnosis'),
+                    'prescription': data.get('prescription'),
+                    'notes': data.get('notes'),
+                    'status': data.get('status', 'Active')
+                }
+            )
+            return JsonResponse({
+                'success': True,
+                'message': 'Record submitted for admin approval'
+            })
+
+        # If user is doctor or admin, create record directly
         record = Record.objects.create(
             patient=patient,
             doctor=doctor,
@@ -922,32 +885,43 @@ def edit_record(request, record_id):
     
     if request.method == 'POST':
         try:
-            # Update record fields
-            record.category = request.POST.get('category', record.category)
-            record.diagnosis = request.POST.get('diagnosis', record.diagnosis)
-            record.prescription = request.POST.get('prescription', record.prescription)
-            record.notes = request.POST.get('notes', record.notes)
-            record.status = request.POST.get('status', record.status)
+            # If user is staff, create pending change
+            if hasattr(request.user, 'staff'):
+                changes = {
+                    'category': request.POST.get('category'),
+                    'diagnosis': request.POST.get('diagnosis'),
+                    'prescription': request.POST.get('prescription'),
+                    'notes': request.POST.get('notes'),
+                    'status': request.POST.get('status')
+                }
+                
+                PendingRecordChange.objects.create(
+                    record=record,
+                    staff=request.user.staff,
+                    change_type='update',
+                    changes=changes
+                )
+                messages.success(request, 'Record update request submitted for approval.')
+                return redirect('view_record')
+            
+            # If user is doctor or admin, update directly
+            record.category = request.POST.get('category')
+            record.diagnosis = request.POST.get('diagnosis')
+            record.prescription = request.POST.get('prescription')
+            record.notes = request.POST.get('notes')
+            record.status = request.POST.get('status')
             record.save()
             
-            messages.success(request, 'Record updated successfully')
+            messages.success(request, 'Record updated successfully.')
             return redirect('view_record')
             
         except Exception as e:
             messages.error(request, f'Error updating record: {str(e)}')
     
-    context = {
-        'record': record,
-        'categories': Record.CATEGORY_CHOICES,
-        'statuses': Record.STATUS_CHOICES
-    }
-    return render(request, 'main/EditRecord.html', context)
+    return render(request, 'main/EditRecord.html', {'record': record})
 
+@login_required
 def check_username(request):
-    """
-    Check if a username is available.
-    Returns JSON response with availability status.
-    """
     username = request.GET.get('username', '').strip()
     
     if not username:
@@ -967,3 +941,183 @@ def check_username(request):
         'available': not exists,
         'message': 'Username is available' if not exists else 'Username is already taken'
     })
+
+@login_required
+@admin_required
+def pending_changes(request):
+    pending_changes = PendingRecordChange.objects.filter(status='pending').select_related(
+        'staff__user', 'record', 'patient__user', 'doctor__user'
+    )
+    return render(request, 'main/PendingChanges.html', {'pending_changes': pending_changes})
+
+@login_required
+@admin_required
+def approve_change(request, change_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        change = get_object_or_404(PendingRecordChange, id=change_id, status='pending')
+        
+        if change.change_type == 'create':
+            # Create new record
+            Record.objects.create(
+                patient=change.patient,
+                doctor=change.doctor,
+                **change.changes
+            )
+        elif change.change_type == 'update':
+            # Update existing record
+            for field, value in change.changes.items():
+                setattr(change.record, field, value)
+            change.record.save()
+        elif change.change_type == 'delete':
+            # Delete record
+            change.record.delete()
+
+        # Update change status
+        change.status = 'approved'
+        change.admin_notes = request.POST.get('admin_notes', '')
+        change.save()
+
+        return JsonResponse({'success': True, 'message': 'Change approved successfully'})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+@admin_required
+def reject_change(request, change_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        change = get_object_or_404(PendingRecordChange, id=change_id, status='pending')
+        change.status = 'rejected'
+        change.admin_notes = request.POST.get('admin_notes', '')
+        change.save()
+
+        return JsonResponse({'success': True, 'message': 'Change rejected successfully'})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+@admin_required
+def get_change_details(request, change_id):
+    try:
+        change = get_object_or_404(PendingRecordChange, id=change_id)
+        
+        data = {
+            'staff_name': change.staff.user.get_full_name(),
+            'created_at': change.created_at.strftime('%B %d, %Y %H:%M'),
+            'change_type': change.change_type,
+            'changes': change.changes,
+        }
+        
+        if change.change_type == 'create':
+            data.update({
+                'patient_name': change.patient.user.get_full_name(),
+                'doctor_name': change.doctor.user.get_full_name(),
+            })
+        elif change.change_type == 'update':
+            data['original'] = {
+                'category': change.record.category,
+                'diagnosis': change.record.diagnosis,
+                'prescription': change.record.prescription,
+                'notes': change.record.notes,
+                'status': change.record.status,
+            }
+        
+        return JsonResponse(data)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def inbox(request):
+    messages_received = Message.objects.filter(receiver=request.user).select_related('sender')
+    messages_sent = Message.objects.filter(sender=request.user).select_related('receiver')
+    unread_count = messages_received.filter(read=False).count()
+    
+    context = {
+        'messages_received': messages_received,
+        'messages_sent': messages_sent,
+        'unread_count': unread_count,
+    }
+    return render(request, 'main/inbox.html', context)
+
+@login_required
+def compose_message(request):
+    if request.method == 'POST':
+        receiver_id = request.POST.get('receiver')
+        subject = request.POST.get('subject')
+        content = request.POST.get('content')
+        
+        try:
+            receiver = User.objects.get(id=receiver_id)
+            
+            # Check if receiver is a doctor (when sender is patient) or patient (when sender is doctor)
+            is_valid = (hasattr(request.user, 'patient') and hasattr(receiver, 'doctor')) or \
+                      (hasattr(request.user, 'doctor') and hasattr(receiver, 'patient'))
+            
+            if not is_valid:
+                messages.error(request, 'Invalid recipient. Messages can only be sent between patients and doctors.')
+                return redirect('compose_message')
+            
+            Message.objects.create(
+                sender=request.user,
+                receiver=receiver,
+                subject=subject,
+                content=content
+            )
+            messages.success(request, 'Message sent successfully!')
+            return redirect('inbox')
+            
+        except User.DoesNotExist:
+            messages.error(request, 'Recipient not found.')
+            return redirect('compose_message')
+    
+    # Get the list of available recipients based on user type
+    if hasattr(request.user, 'patient'):
+        recipients = User.objects.filter(doctor__isnull=False)
+    elif hasattr(request.user, 'doctor'):
+        recipients = User.objects.filter(patient__isnull=False)
+    else:
+        recipients = User.objects.none()
+    
+    context = {
+        'recipients': recipients
+    }
+    return render(request, 'main/compose_message.html', context)
+
+@login_required
+def view_message(request, message_id):
+    message = get_object_or_404(Message, id=message_id)
+    
+    # Check if user has permission to view this message
+    if message.sender != request.user and message.receiver != request.user:
+        messages.error(request, 'You do not have permission to view this message.')
+        return redirect('inbox')
+    
+    # Mark message as read if the user is the receiver
+    if message.receiver == request.user and not message.read:
+        message.read = True
+        message.save()
+    
+    context = {
+        'message': message
+    }
+    return render(request, 'main/view_message.html', context)
+
+@login_required
+def delete_message(request, message_id):
+    message = get_object_or_404(Message, id=message_id)
+    
+    # Check if user has permission to delete this message
+    if message.sender != request.user and message.receiver != request.user:
+        messages.error(request, 'You do not have permission to delete this message.')
+        return redirect('inbox')
+    
+    message.delete()
+    messages.success(request, 'Message deleted successfully!')
+    return redirect('inbox')

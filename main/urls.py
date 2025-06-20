@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import message_views
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -49,4 +50,16 @@ urlpatterns = [
     
     # Username validation
     path('check-username/', views.check_username, name='check_username'),
+    
+    # Pending Changes
+    path('pending-changes/', views.pending_changes, name='pending_changes'),
+    path('approve-change/<int:change_id>/', views.approve_change, name='approve_change'),
+    path('reject-change/<int:change_id>/', views.reject_change, name='reject_change'),
+    path('get-change-details/<int:change_id>/', views.get_change_details, name='get_change_details'),
+    
+    # Messaging System
+    path('inbox/', message_views.inbox, name='inbox'),
+    path('compose-message/', message_views.compose_message, name='compose_message'),
+    path('view-message/<int:message_id>/', message_views.view_message, name='view_message'),
+    path('delete-message/<int:message_id>/', message_views.delete_message, name='delete_message'),
 ]

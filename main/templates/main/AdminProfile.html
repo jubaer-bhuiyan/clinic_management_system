@@ -5,11 +5,24 @@
 
 {% block content %}
 <div class="admin-dashboard">
+  {% if messages %}
+    <div class="messages-container mb-4">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Profile and Overview Section -->
   <div class="row mb-4">
+    <!-- Admin Profile Card -->
     <div class="col-md-4">
-      <div class="card">
+      <div class="card profile-card">
         <div class="card-header">
-          <h5 class="mb-0">Admin Profile</h5>
+          <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>Admin Profile</h5>
         </div>
         <div class="card-body text-center">
           <div class="profile-picture-container mb-4">
@@ -19,49 +32,72 @@
               <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture" class="profile-picture">
             {% endif %}
           </div>
-          <h4>{{ user.get_full_name }}</h4>
-          <p class="text-muted">Administrator</p>
+          <h4 class="admin-name">{{ user.get_full_name }}</h4>
+          <p class="text-muted role-badge">Administrator</p>
           {% if admin_profile.phone or admin_profile.address %}
             <div class="contact-info mt-3">
               {% if admin_profile.phone %}
-                <p><strong>Phone:</strong> {{ admin_profile.phone }}</p>
+                <p><i class="fas fa-phone me-2"></i>{{ admin_profile.phone }}</p>
               {% endif %}
               {% if admin_profile.address %}
-                <p><strong>Address:</strong> {{ admin_profile.address }}</p>
+                <p><i class="fas fa-map-marker-alt me-2"></i>{{ admin_profile.address }}</p>
               {% endif %}
             </div>
           {% endif %}
-          <div class="mt-3">
-            <a href="{% url 'edit_profile' %}" class="btn btn-primary btn-sm">Edit Profile</a>
-            <a href="{% url 'change_password' %}" class="btn btn-outline-primary btn-sm">Change Password</a>
+          <div class="mt-4 profile-actions">
+            <a href="{% url 'edit_profile' %}" class="btn btn-primary btn-sm me-2">
+              <i class="fas fa-edit me-1"></i>Edit Profile
+            </a>
+            <a href="{% url 'change_password' %}" class="btn btn-outline-primary btn-sm">
+              <i class="fas fa-key me-1"></i>Change Password
+            </a>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- System Overview Card -->
     <div class="col-md-8">
-      <div class="card">
+      <div class="card overview-card">
         <div class="card-header">
-          <h5 class="mb-0">System Overview</h5>
+          <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>System Overview</h5>
         </div>
         <div class="card-body">
-          <div class="row">
-            <div class="col-md-4">
-              <div class="text-center mb-3">
+          <div class="row stats-container">
+            <div class="col-md-3">
+              <div class="stat-item text-center">
+                <div class="stat-icon mb-2">
+                  <i class="fas fa-user-md"></i>
+                </div>
                 <h3>{{ doctor_count }}</h3>
                 <p class="text-muted mb-0">Doctors</p>
               </div>
             </div>
-            <div class="col-md-4">
-              <div class="text-center mb-3">
+            <div class="col-md-3">
+              <div class="stat-item text-center">
+                <div class="stat-icon mb-2">
+                  <i class="fas fa-users"></i>
+                </div>
                 <h3>{{ staff_count }}</h3>
                 <p class="text-muted mb-0">Staff Members</p>
               </div>
             </div>
-            <div class="col-md-4">
-              <div class="text-center mb-3">
+            <div class="col-md-3">
+              <div class="stat-item text-center">
+                <div class="stat-icon mb-2">
+                  <i class="fas fa-user-injured"></i>
+                </div>
                 <h3>{{ patient_count }}</h3>
                 <p class="text-muted mb-0">Patients</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-item text-center">
+                <div class="stat-icon mb-2">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <h3>{{ pending_changes_count }}</h3>
+                <p class="text-muted mb-0">Pending Changes</p>
               </div>
             </div>
           </div>
@@ -70,61 +106,78 @@
     </div>
   </div>
 
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-
-  <div class="row">
-    <div class="col-md-4 mb-4">
-      <div class="card">
+  <!-- Management Section -->
+  <div class="row mb-4">
+    <!-- Doctor Management -->
+    <div class="col-md-3 mb-4">
+      <div class="card management-card">
         <div class="card-header">
-          <h5 class="mb-0">Doctor Management</h5>
+          <h5 class="mb-0"><i class="fas fa-user-md me-2"></i>Doctor Management</h5>
         </div>
         <div class="card-body">
           <div class="list-group">
             <a href="{% url 'add_doctor' %}" class="list-group-item list-group-item-action">
-              <i class="fas fa-user-md mr-2"></i>Add New Doctor
+              <i class="fas fa-plus-circle me-2"></i>Add New Doctor
             </a>
             <a href="{% url 'view_doctors' %}" class="list-group-item list-group-item-action">
-              <i class="fas fa-list mr-2"></i>View All Doctors
+              <i class="fas fa-list me-2"></i>View All Doctors
             </a>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="col-md-4 mb-4">
-      <div class="card">
+    <!-- Staff Management -->
+    <div class="col-md-3 mb-4">
+      <div class="card management-card">
         <div class="card-header">
-          <h5 class="mb-0">Staff Management</h5>
+          <h5 class="mb-0"><i class="fas fa-users me-2"></i>Staff Management</h5>
         </div>
         <div class="card-body">
           <div class="list-group">
             <a href="{% url 'add_staff' %}" class="list-group-item list-group-item-action">
-              <i class="fas fa-user-plus mr-2"></i>Add New Staff
+              <i class="fas fa-user-plus me-2"></i>Add New Staff
             </a>
             <a href="{% url 'view_staffs' %}" class="list-group-item list-group-item-action">
-              <i class="fas fa-users mr-2"></i>View All Staff
+              <i class="fas fa-list me-2"></i>View All Staff
             </a>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="col-md-4 mb-4">
-      <div class="card">
+    <!-- Patient Management -->
+    <div class="col-md-3 mb-4">
+      <div class="card management-card">
         <div class="card-header">
-          <h5 class="mb-0">Patient Management</h5>
+          <h5 class="mb-0"><i class="fas fa-user-injured me-2"></i>Patient Management</h5>
         </div>
         <div class="card-body">
           <div class="list-group">
             <a href="{% url 'manage_patient_profile' %}" class="list-group-item list-group-item-action">
-              <i class="fas fa-user-edit mr-2"></i>Manage Patient Profiles
+              <i class="fas fa-user-edit me-2"></i>Manage Profiles
             </a>
             <a href="{% url 'view_record' %}" class="list-group-item list-group-item-action">
-              <i class="fas fa-file-medical mr-2"></i>View Medical Records
+              <i class="fas fa-file-medical me-2"></i>Medical Records
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Record Changes -->
+    <div class="col-md-3 mb-4">
+      <div class="card management-card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-history me-2"></i>Record Changes</h5>
+        </div>
+        <div class="card-body">
+          <div class="list-group">
+            <a href="{% url 'pending_changes' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+              <span><i class="fas fa-clock me-2"></i>Review Changes</span>
+              {% if pending_changes_count > 0 %}
+                <span class="badge bg-primary rounded-pill">{{ pending_changes_count }}</span>
+              {% endif %}
             </a>
           </div>
         </div>
@@ -132,19 +185,20 @@
     </div>
   </div>
 
-  <div class="row mt-4">
-    <div class="col-md-6 offset-md-3">
-      <div class="card">
+  <!-- Account Settings Section -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card settings-card">
         <div class="card-header">
-          <h5 class="mb-0">Account Settings</h5>
+          <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Account Settings</h5>
         </div>
         <div class="card-body">
           <div class="list-group">
             <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action">
-              <i class="fas fa-key mr-2"></i>Change Password
+              <i class="fas fa-key me-2"></i>Change Password
             </a>
             <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">
-              <i class="fas fa-sign-out-alt mr-2"></i>Logout
+              <i class="fas fa-sign-out-alt me-2"></i>Logout
             </a>
           </div>
         </div>
@@ -155,58 +209,135 @@
 
 {% block extra_css %}
 <style>
-  .admin-dashboard .card {
-    transition: transform 0.2s;
-    border: none;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  /* Dashboard Layout */
+  .admin-dashboard {
+    padding: 1.5rem 0;
   }
+
+  /* Card Styles */
+  .admin-dashboard .card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+  }
+
   .admin-dashboard .card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
   }
-  .admin-dashboard .list-group-item {
-    border: none;
-    padding: 0.75rem 1.25rem;
-    margin-bottom: 0.5rem;
-    border-radius: 0.25rem;
-    background-color: #f8f9fa;
-    transition: all 0.2s;
-  }
-  .admin-dashboard .list-group-item:hover {
-    background-color: #e9ecef;
-    transform: translateX(5px);
-  }
-  .admin-dashboard .text-danger:hover {
-    background-color: #dc3545 !important;
-    color: white !important;
-  }
-  .admin-dashboard h3 {
-    font-size: 2.5rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
+
   .card-header {
-    background-color: #87ceeb;
+    background: linear-gradient(135deg, #4a90e2, #87ceeb);
     color: white;
     border-bottom: none;
+    padding: 1rem 1.25rem;
   }
+
+  /* Profile Section */
   .profile-picture-container {
     position: relative;
     display: inline-block;
+    margin: 1rem 0;
   }
+
   .profile-picture {
     width: 150px;
     height: 150px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #fff;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border: 4px solid #fff;
+    box-shadow: 0 0 20px rgba(0,0,0,0.15);
   }
+
+  /* Stats Section */
+  .admin-dashboard h3 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0.5rem 0;
+  }
+
+  .text-center .mb-3 {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+
+  .text-center .mb-3:hover {
+    background-color: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+
+  /* List Items */
+  .admin-dashboard .list-group-item {
+    border: none;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px !important;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  .admin-dashboard .list-group-item:hover {
+    background-color: #e9ecef;
+    transform: translateX(5px);
+  }
+
+  .admin-dashboard .list-group-item i {
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+  }
+
+  .admin-dashboard .text-danger:hover {
+    background-color: #dc3545 !important;
+    color: white !important;
+  }
+
+  /* Contact Info */
   .contact-info {
     border-top: 1px solid #eee;
-    padding-top: 1rem;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
   }
+
   .contact-info p {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .contact-info i {
+    margin-right: 0.5rem;
+    color: #4a90e2;
+  }
+
+  /* Badges */
+  .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 20px;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .admin-dashboard .card {
+      margin-bottom: 1rem;
+    }
+    
+    .text-center .mb-3 {
+      margin-bottom: 1rem !important;
+    }
+    
+    .admin-dashboard h3 {
+      font-size: 1.8rem;
+    }
   }
 </style>
 {% endblock %}

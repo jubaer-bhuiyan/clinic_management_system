@@ -102,7 +102,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+    </div>
 
                         <style>
                         .icon-circle {
@@ -168,9 +168,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
+      </div>
+      </div>
+      </div>
 
                         <div class="row mt-5">
                             <div class="col-12 text-center">
@@ -188,11 +188,11 @@
                                 {% elif user.staff %}
                                     <a href="{% url 'staff_profile' %}" class="btn btn-outline-secondary btn-lg px-5">Cancel</a>
                                 {% endif %}
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+      </div>
+      </div>
+    </form>
+  </div>
+</div>
         </div>
     </div>
 </div>
@@ -552,7 +552,7 @@ function showToast(message, type = 'info') {
         <div class="toast-content">
             <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
             <span>${message}</span>
-        </div>
+  </div>
     `;
     
     document.body.appendChild(toast);

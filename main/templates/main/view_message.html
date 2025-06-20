@@ -1,0 +1,145 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}View Message - Clinic Management System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>View Message</h2>
+                <div>
+                    <button onclick="confirmDelete('{% url 'delete_message' message.id %}')" class="btn btn-danger me-2">
+                        <i class="fas fa-trash me-2"></i>Delete
+                    </button>
+                    <a href="{% url 'inbox' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Inbox
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="message-header mb-4">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>From:</strong> 
+                                    {% if message.sender.doctor %}Dr. {% endif %}
+                                    {{ message.sender.get_full_name }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>To:</strong> 
+                                    {% if message.receiver.doctor %}Dr. {% endif %}
+                                    {{ message.receiver.get_full_name }}
+                                </p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <p class="mb-2">
+                                    <strong>Date:</strong> 
+                                    {{ message.created_at|date:"M d, Y H:i" }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Status:</strong>
+                                    {% if message.read %}
+                                        <span class="badge bg-success">Read</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Unread</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="subject-line">
+                            <h4>{{ message.subject }}</h4>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="message-content">
+                        {{ message.content|linebreaks }}
+                    </div>
+                    <hr>
+                    <div class="message-actions text-end">
+                        {% if message.receiver == request.user %}
+                            <a href="{% url 'compose_message' %}?reply_to={{ message.id }}" class="btn btn-primary">
+                                <i class="fas fa-reply me-2"></i>Reply
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this message?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function confirmDelete(deleteUrl) {
+    document.getElementById('confirmDeleteBtn').href = deleteUrl;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.message-header {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+}
+
+.subject-line {
+    margin-top: 1rem;
+}
+
+.subject-line h4 {
+    color: #2c3e50;
+    margin: 0;
+}
+
+.message-content {
+    padding: 1.5rem;
+    min-height: 200px;
+    white-space: pre-line;
+}
+
+.badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+}
+
+hr {
+    margin: 1.5rem 0;
+}
+</style>
+{% endblock %}
+
+{% endblock %} 

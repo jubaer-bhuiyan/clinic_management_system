@@ -3,14 +3,14 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-}
+    }
 
-.navbar {
+    .navbar {
     background-color: #87ceeb;
     padding: 1rem 2rem;
-}
+    }
 
-.navbar-brand, .navbar-nav .nav-link {
+    .navbar-brand, .navbar-nav .nav-link {
     color: #ffffff !important;
     font-weight: 500;
 }
@@ -38,9 +38,9 @@ body {
     color: #ffffff;
 }
 
-.jumbotron {
+    .jumbotron {
     background-color: #ffffff;
-    margin-top: 20px;
+        margin-top: 20px;
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
@@ -49,20 +49,20 @@ body {
     flex: 1;
 }
 
-.footer {
+    .footer {
     background-color: #87ceeb;
     color: #ffffff;
-    text-align: center;
+        text-align: center;
     padding: 1rem 0;
     margin-top: 2rem;
-    width: 100%;
-}
+        width: 100%;
+    }
 
-.footer p {
-    margin-bottom: 0;
-}
+    .footer p {
+        margin-bottom: 0;
+    }
 
-.jumbotron img {
+    .jumbotron img {
     max-width: 100%;
     height: auto;
     border-radius: 8px;

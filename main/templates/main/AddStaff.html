@@ -19,7 +19,7 @@
                 {% csrf_token %}
                 
                 <div class="row">
-                    <div class="col-md-6">
+            <div class="col-md-6">
                         <h4 class="mb-3">Account Information</h4>
                         <div class="form-group">
                             <label for="username">Username</label>
@@ -38,7 +38,7 @@
                             <label for="email">Email</label>
                             <input type="email" class="form-control" id="email" name="email" required>
                         </div>
-                        <div class="form-group">
+                    <div class="form-group">
                             <label for="password">Password</label>
                             <div class="input-group">
                                 <input type="password" class="form-control" id="password" name="password" required minlength="8">
@@ -62,8 +62,8 @@
                         <div class="form-group">
                             <label for="last_name">Last Name</label>
                             <input type="text" class="form-control" id="last_name" name="last_name" required>
-                        </div>
-                        <div class="form-group">
+                    </div>
+                    <div class="form-group">
                             <label for="position">Position</label>
                             <input type="text" class="form-control" id="position" name="position" required>
                             <small class="form-text text-muted">e.g., Nurse, Receptionist, Lab Technician</small>
@@ -77,8 +77,8 @@
                         <div class="form-group">
                             <label for="phone">Phone Number</label>
                             <input type="tel" class="form-control" id="phone" name="phone" required>
-                        </div>
-                        <div class="form-group">
+                    </div>
+                    <div class="form-group">
                             <label for="address">Address</label>
                             <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
                         </div>
@@ -89,7 +89,7 @@
                     <button type="submit" class="btn btn-primary">Add Staff Member</button>
                     <a href="{% url 'view_staffs' %}" class="btn btn-secondary">Cancel</a>
                 </div>
-            </form>
+                </form>
         </div>
     </div>
 </div>
