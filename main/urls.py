@@ -44,6 +44,16 @@ urlpatterns = [
     path('add-record/', views.add_record, name='add_record'),
     path('edit-record/<int:record_id>/', views.edit_record, name='edit_record'),
     path('update-record/<int:record_id>/', views.update_record, name='update_record'),
+    path('download-record/<int:record_id>/', views.download_record, name='download_record'),
+    
+    # Task Management
+    path('add-task/', views.add_task, name='add_task'),
+    path('update-task/<int:task_id>/', views.update_task, name='update_task'),
+    path('delete-task/<int:task_id>/', views.delete_task, name='delete_task'),
+    
+    # Appointment Management
+    path('cancel-appointment/<int:appointment_id>/', views.cancel_appointment, name='cancel_appointment'),
+    path('check-in-patient/<int:appointment_id>/', views.check_in_patient, name='check_in_patient'),
     
     # User Settings
     path('change-password/', views.change_password, name='change_password'),

@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import PasswordChangeForm
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.db.models import Q
@@ -118,9 +118,31 @@ def patient_profile(request):
     appointments = Appointment.objects.filter(patient=request.user.patient).order_by('-appointment_date', '-appointment_time')
     records = Record.objects.filter(patient=request.user.patient).order_by('-created_at')
     
+    # Count upcoming appointments
+    upcoming_appointments_count = appointments.filter(
+        appointment_date__gte=timezone.now().date(),
+        status='PENDING'
+    ).count()
+    
+    # Count completed visits
+    completed_visits = appointments.filter(status='COMPLETED').count()
+    
+    # Count medical records
+    medical_records_count = records.count()
+    
+    # Count unread messages
+    unread_messages = Message.objects.filter(
+        receiver=request.user,
+        read=False
+    ).count()
+    
     context = {
         'appointments': appointments,
         'records': records,
+        'upcoming_appointments_count': upcoming_appointments_count,
+        'completed_visits': completed_visits,
+        'medical_records_count': medical_records_count,
+        'unread_messages': unread_messages,
     }
     return render(request, 'main/PatientProfile.html', context)
 
@@ -485,66 +507,33 @@ def manage_patient_profile(request):
 @login_required
 def view_record(request):
     # Initialize records based on user role
-    if hasattr(request.user, 'patient'):
-        records = Record.objects.filter(patient=request.user.patient)
-    elif hasattr(request.user, 'doctor'):
-        records = Record.objects.filter(doctor=request.user.doctor)
+    records = None
+    appointments = None
+    
+    if hasattr(request.user, 'doctor'):
+        records = Record.objects.filter(doctor=request.user.doctor).select_related(
+            'patient__user', 'doctor__user'
+        ).order_by('-created_at')
+        appointments = Appointment.objects.filter(
+            doctor=request.user.doctor, 
+            status='CONFIRMED'
+        ).select_related('patient__user')
+    elif hasattr(request.user, 'patient'):
+        records = Record.objects.filter(patient=request.user.patient).select_related(
+            'doctor__user', 'patient__user'
+        ).order_by('-created_at')
     elif hasattr(request.user, 'staff') or request.user.is_staff:
-        records = Record.objects.all()
-    else:
-        messages.error(request, 'Unauthorized access')
-        return redirect('login')
-
-    records = records.select_related('patient__user', 'doctor__user').order_by('-created_at')
-
-    # Get filter parameters
-    date_from = request.GET.get('date_from')
-    date_to = request.GET.get('date_to')
-    doctor_id = request.GET.get('doctor')
-    category = request.GET.get('category')
-    status = request.GET.get('status')
-    search = request.GET.get('search')
-
-    # Apply search filter
-    if search:
-        records = records.filter(
-            Q(patient__user__first_name__icontains=search) |
-            Q(patient__user__last_name__icontains=search) |
-            Q(doctor__user__first_name__icontains=search) |
-            Q(doctor__user__last_name__icontains=search) |
-            Q(diagnosis__icontains=search) |
-            Q(prescription__icontains=search) |
-            Q(notes__icontains=search)
-        )
-
-    # Apply date filters
-    if date_from:
-        records = records.filter(created_at__date__gte=date_from)
-    if date_to:
-        records = records.filter(created_at__date__lte=date_to)
-
-    # Apply doctor filter
-    if doctor_id:
-        records = records.filter(doctor_id=doctor_id)
-
-    # Apply category filter
-    if category:
-        records = records.filter(category=category)
-
-    # Apply status filter
-    if status:
-        records = records.filter(status=status)
-
-    # Get all doctors for the filter dropdown
-    doctors = Doctor.objects.select_related('user').all()
-
-    context = {
+        records = Record.objects.all().select_related(
+            'doctor__user', 'patient__user'
+        ).order_by('-created_at')
+        appointments = Appointment.objects.filter(
+            status='CONFIRMED'
+        ).select_related('patient__user', 'doctor__user')
+    
+    return render(request, 'main/records.html', {
         'records': records,
-        'doctors': doctors,
-        'categories': Record.CATEGORY_CHOICES,
-        'statuses': Record.STATUS_CHOICES
-    }
-    return render(request, 'main/Record.html', context)
+        'appointments': appointments
+    })
 
 @login_required
 @require_http_methods(["GET"])
@@ -562,6 +551,7 @@ def get_record_details(request, record_id):
             return JsonResponse({'error': 'Unauthorized'}, status=403)
 
         data = {
+            'patient_id': record.patient.id,
             'patient_name': record.patient.user.get_full_name(),
             'doctor_name': record.doctor.user.get_full_name(),
             'date': record.created_at.strftime('%B %d, %Y'),
@@ -816,9 +806,35 @@ def doctor_profile(request):
         doctor=request.user.doctor
     ).select_related('patient__user').order_by('-created_at')[:10]  # Get only the 10 most recent records
     
+    # Count upcoming appointments
+    upcoming_appointments_count = appointments.filter(
+        status='PENDING'
+    ).count()
+    
+    # Count completed visits
+    completed_visits = Appointment.objects.filter(
+        doctor=request.user.doctor,
+        status='COMPLETED'
+    ).count()
+    
+    # Count medical records
+    medical_records_count = Record.objects.filter(
+        doctor=request.user.doctor
+    ).count()
+    
+    # Count unread messages
+    unread_messages = Message.objects.filter(
+        receiver=request.user,
+        read=False
+    ).count()
+    
     context = {
         'appointments': appointments,
         'records': records,
+        'upcoming_appointments_count': upcoming_appointments_count,
+        'completed_visits': completed_visits,
+        'medical_records_count': medical_records_count,
+        'unread_messages': unread_messages,
     }
     return render(request, 'main/DoctorProfile.html', context)
 
@@ -826,17 +842,140 @@ def doctor_profile(request):
 @staff_required
 def staff_profile(request):
     today = timezone.now().date()
+    
+    # Get today's appointments
     today_appointments = Appointment.objects.filter(
         appointment_date=today
-    ).order_by('appointment_time')
+    ).select_related('doctor__user', 'patient__user').order_by('appointment_time')
     
-    recent_records = Record.objects.all().order_by('-created_at')[:10]
+    # Get recent records
+    recent_records = Record.objects.all().select_related(
+        'doctor__user', 'patient__user'
+    ).order_by('-created_at')[:10]
+    
+    # Get statistics
+    today_appointments_count = today_appointments.count()
+    active_patients = Patient.objects.filter(user__is_active=True).count()
+    available_doctors = Doctor.objects.filter(user__is_active=True).count()
+    pending_tasks = 0  # This will be implemented when task system is added
     
     context = {
         'today_appointments': today_appointments,
         'recent_records': recent_records,
+        'today_appointments_count': today_appointments_count,
+        'active_patients': active_patients,
+        'available_doctors': available_doctors,
+        'pending_tasks': pending_tasks,
+        'tasks': [],  # This will be populated when task system is implemented
     }
     return render(request, 'main/StaffProfile.html', context)
+
+@login_required
+def add_task(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        description = request.POST.get('description')
+        due_date = request.POST.get('due_date')
+        
+        if not description or not due_date:
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+        # Task model will be implemented later
+        # For now, just return success
+        return JsonResponse({'success': True})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def update_task(request, task_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        completed = request.POST.get('completed') == 'true'
+        
+        # Task model will be implemented later
+        # For now, just return success
+        return JsonResponse({'success': True})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def delete_task(request, task_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        # Task model will be implemented later
+        # For now, just return success
+        return JsonResponse({'success': True})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def cancel_appointment(request, appointment_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        appointment = get_object_or_404(Appointment, id=appointment_id)
+        appointment.status = 'CANCELLED'
+        appointment.save()
+        
+        return JsonResponse({'success': True})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def check_in_patient(request, appointment_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    try:
+        appointment = get_object_or_404(Appointment, id=appointment_id)
+        
+        if appointment.status != 'CONFIRMED':
+            return JsonResponse({'error': 'Appointment must be confirmed first'}, status=400)
+        
+        appointment.status = 'COMPLETED'
+        appointment.save()
+        
+        return JsonResponse({'success': True})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def download_record(request, record_id):
+    try:
+        record = get_object_or_404(Record, id=record_id)
+        
+        # Generate PDF or other format
+        # For now, just return a text response
+        response = HttpResponse(content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename="record_{record_id}.txt"'
+        
+        response.write(f"Patient: {record.patient.user.get_full_name()}\n")
+        response.write(f"Doctor: Dr. {record.doctor.user.get_full_name()}\n")
+        response.write(f"Date: {record.created_at}\n")
+        response.write(f"Category: {record.category}\n")
+        response.write(f"Status: {record.status}\n\n")
+        response.write(f"Diagnosis:\n{record.diagnosis}\n\n")
+        response.write(f"Prescription:\n{record.prescription}\n\n")
+        if record.notes:
+            response.write(f"Notes:\n{record.notes}\n")
+        
+        return response
+        
+    except Exception as e:
+        messages.error(request, f'Error downloading record: {str(e)}')
+        return redirect('view_record')
 
 @login_required
 @require_http_methods(["POST"])

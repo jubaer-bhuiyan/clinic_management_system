@@ -4,185 +4,6 @@
 {% block title %}Doctor Dashboard - Clinic Management System{% endblock %}
 
 {% block content %}
-<style>
-/* Medical Records Table Styles */
-.medical-records-table {
-    margin-bottom: 0;
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.medical-records-table th {
-    background-color: #f8f9fa;
-    border-top: none;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    color: #6c757d;
-    padding: 1rem;
-    white-space: nowrap;
-}
-
-.medical-records-table td {
-    padding: 1rem;
-    vertical-align: middle;
-    border-top: 1px solid #e9ecef;
-}
-
-.medical-records-table tbody tr {
-    transition: all 0.2s ease;
-}
-
-.medical-records-table tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.02);
-}
-
-/* Patient Column */
-.patient-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.patient-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.patient-avatar-placeholder {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #6c757d;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 500;
-}
-
-.patient-details {
-    display: flex;
-    flex-direction: column;
-}
-
-.patient-name {
-    font-weight: 500;
-    color: #2d3748;
-    margin-bottom: 0.25rem;
-}
-
-.patient-id {
-    font-size: 0.75rem;
-    color: #718096;
-}
-
-/* Category Badges */
-.badge-soft-general {
-    background-color: #e2e8f0;
-    color: #475569;
-}
-
-.badge-soft-emergency {
-    background-color: #fee2e2;
-    color: #dc2626;
-}
-
-.badge-soft-followup {
-    background-color: #e0e7ff;
-    color: #4f46e5;
-}
-
-.badge-soft-specialist {
-    background-color: #f0fdf4;
-    color: #16a34a;
-}
-
-/* Status Badges */
-.badge-active {
-    background-color: #dcfce7;
-    color: #16a34a;
-}
-
-.badge-completed {
-    background-color: #e2e8f0;
-    color: #475569;
-}
-
-.badge-followuprequired {
-    background-color: #fef3c7;
-    color: #d97706;
-}
-
-/* Action Buttons */
-.action-buttons {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-end;
-}
-
-.action-button {
-    padding: 0.375rem;
-    border-radius: 0.375rem;
-    border: none;
-    background-color: transparent;
-    color: #4a5568;
-    transition: all 0.2s ease;
-}
-
-.action-button:hover {
-    background-color: #f7fafc;
-    color: #2d3748;
-}
-
-.action-button i {
-    font-size: 0.875rem;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .medical-records-table {
-        display: block;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .medical-records-table th,
-    .medical-records-table td {
-        padding: 0.75rem;
-    }
-    
-    .patient-avatar,
-    .patient-avatar-placeholder {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .patient-name {
-        font-size: 0.875rem;
-    }
-    
-    .patient-id {
-        font-size: 0.75rem;
-    }
-    
-    .badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-    }
-    
-    .action-button {
-        padding: 0.25rem;
-    }
-    
-    .action-button i {
-        font-size: 0.75rem;
-    }
-}
-</style>
-
 <div class="doctor-dashboard">
     <div class="container-fluid">
         <!-- Stats Overview -->
@@ -420,85 +241,57 @@
 
                 <!-- Recent Records -->
                 <div class="card">
-                    <div class="card-header bg-white">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">
-                                <i class="fas fa-file-medical text-primary mr-2"></i>
-                                Recent Medical Records
-                            </h5>
-                            <button class="btn btn-primary btn-sm" onclick="$('#recordModal').modal('show')">
-                                <i class="fas fa-plus mr-1"></i>
-                                Add Record
-                            </button>
-                        </div>
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-file-medical mr-2"></i>Recent Medical Records</h5>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="card-body">
                         {% if records %}
                             <div class="table-responsive">
-                                <table class="table table-hover mb-0">
+                                <table class="table table-hover">
                                     <thead>
                                         <tr>
-                                            <th style="min-width: 200px; background-color: #f8f9fa; border-top: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; color: #6c757d; padding: 1rem;">Patient</th>
-                                            <th style="min-width: 120px; background-color: #f8f9fa; border-top: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; color: #6c757d; padding: 1rem;">Category</th>
-                                            <th style="min-width: 250px; background-color: #f8f9fa; border-top: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; color: #6c757d; padding: 1rem;">Diagnosis</th>
-                                            <th style="min-width: 120px; background-color: #f8f9fa; border-top: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; color: #6c757d; padding: 1rem;">Date</th>
-                                            <th style="min-width: 120px; background-color: #f8f9fa; border-top: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; color: #6c757d; padding: 1rem;">Status</th>
-                                            <th style="min-width: 100px; background-color: #f8f9fa; border-top: none; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; color: #6c757d; padding: 1rem; text-align: right;">Actions</th>
+                                            <th>Patient</th>
+                                            <th>Category</th>
+                                            <th>Diagnosis</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for record in records %}
-                                            <tr style="transition: all 0.2s ease;">
-                                                <td style="padding: 1rem; vertical-align: middle;">
-                                                    <div class="patient-info">
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
                                                         {% if record.patient.profile_picture %}
-                                                            <img src="{{ record.patient.profile_picture.url }}" alt="Patient" class="patient-avatar">
+                                                            <img src="{{ record.patient.profile_picture.url }}" alt="Patient" class="rounded-circle mr-2" style="width: 32px; height: 32px;">
                                                         {% else %}
-                                                            <div class="patient-avatar-placeholder">
+                                                            <div class="rounded-circle bg-secondary text-white mr-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
                                                                 {{ record.patient.user.get_full_name|make_list|first }}
                                                             </div>
                                                         {% endif %}
-                                                        <div class="patient-details">
-                                                            <span class="patient-name">{{ record.patient.user.get_full_name }}</span>
-                                                            <div class="patient-info-details">
-                                                                <i class="fas fa-user"></i>{{ record.patient.user.username }}<br>
-                                                                <i class="fas fa-phone"></i>{{ record.patient.phone }}
-                                                            </div>
-                                                        </div>
+                                                        {{ record.patient.user.get_full_name }}
                                                     </div>
                                                 </td>
-                                                <td style="padding: 1rem; vertical-align: middle;">
-                                                    <span class="badge" style="background-color: {% if record.category == 'General' %}#e2e8f0{% elif record.category == 'Emergency' %}#fee2e2{% elif record.category == 'Follow-up' %}#e0e7ff{% else %}#f0fdf4{% endif %}; color: {% if record.category == 'General' %}#475569{% elif record.category == 'Emergency' %}#dc2626{% elif record.category == 'Follow-up' %}#4f46e5{% else %}#16a34a{% endif %}; padding: 0.5rem 0.75rem; font-weight: 500; font-size: 0.75rem; border-radius: 0.5rem;">
+                                                <td>
+                                                    <span class="badge badge-soft-{{ record.category|lower }}">
                                                         {{ record.category }}
                                                     </span>
                                                 </td>
-                                                <td style="padding: 1rem; vertical-align: middle;">
-                                                    <div style="max-width: 250px; overflow: hidden; text-overflow: ellipsis;">
-                                                        {{ record.diagnosis|truncatechars:100 }}
-                                                    </div>
-                                                </td>
-                                                <td style="padding: 1rem; vertical-align: middle;">
-                                                    <div>
-                                                        {{ record.created_at|date:"M d, Y" }}
-                                                        <br>
-                                                        <small class="text-muted">{{ record.created_at|time:"g:i A" }}</small>
-                                                    </div>
-                                                </td>
-                                                <td style="padding: 1rem; vertical-align: middle;">
-                                                    <span class="badge" style="background-color: {% if record.status == 'Active' %}#dcfce7{% elif record.status == 'Completed' %}#e2e8f0{% else %}#fef3c7{% endif %}; color: {% if record.status == 'Active' %}#16a34a{% elif record.status == 'Completed' %}#475569{% else %}#d97706{% endif %}; padding: 0.5rem 0.75rem; font-weight: 500; font-size: 0.75rem; border-radius: 0.5rem;">
+                                                <td>{{ record.diagnosis|truncatechars:30 }}</td>
+                                                <td>{{ record.created_at|date:"M d, Y" }}</td>
+                                                <td>
+                                                    <span class="badge badge-{{ record.status|lower }}">
                                                         {{ record.status }}
                                                     </span>
                                                 </td>
-                                                <td class="text-right">
+                                                <td>
                                                     <div class="btn-group">
-                                                        <button class="btn btn-sm btn-info" onclick="viewRecord('{{ record.id }}')" title="View Details">
+                                                        <button class="btn btn-sm btn-info" onclick="viewRecord('{{ record.id }}')">
                                                             <i class="fas fa-eye"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-primary" onclick="editRecord('{{ record.id }}')" title="Edit Record">
+                                                        <button class="btn btn-sm btn-primary" onclick="editRecord('{{ record.id }}')">
                                                             <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-secondary" onclick="downloadRecord('{{ record.id }}')" title="Download Record">
-                                                            <i class="fas fa-download"></i>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -508,9 +301,9 @@
                                 </table>
                             </div>
                         {% else %}
-                            <div class="text-center py-5">
+                            <div class="text-center py-4">
                                 <img src="{% static 'images/no-records.svg' %}" alt="No Records" style="width: 120px; opacity: 0.5;">
-                                <p class="text-muted mt-3 mb-0">No medical records found</p>
+                                <p class="text-muted mt-3">No medical records found.</p>
                             </div>
                         {% endif %}
                     </div>
@@ -595,7 +388,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="downloadRecord(currentRecordId)">Download</button>
+                <button type="button" class="btn btn-primary" onclick="downloadRecord()">Download</button>
             </div>
         </div>
     </div>
@@ -653,113 +446,13 @@ function checkInPatient(appointmentId) {
     }
 }
 
-// Global variables
-let currentRecordId = null;
-const doctorId = '{{ user.doctor.id }}';
-
-// Event handlers for modal close
-$('#recordModal').on('hidden.bs.modal', function () {
-    // Reset form and modal state
-    document.getElementById('recordForm').reset();
-    document.getElementById('recordModalLabel').textContent = 'Add Medical Record';
-    const saveButton = document.querySelector('#recordModal .btn-primary');
-    saveButton.textContent = 'Save Record';
-    saveButton.onclick = saveRecord;
-});
-
-$('#viewRecordModal').on('show.bs.modal', function (event) {
-    // Store the current record ID when viewing
-    const button = $(event.relatedTarget);
-    currentRecordId = button.data('record-id');
-});
-
-function editRecord(recordId) {
-    fetch(`/get-record-details/${recordId}/`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.error) {
-                throw new Error(data.error);
-            }
-            
-            // Fill the form with existing data
-            const form = document.getElementById('recordForm');
-            form.patient.value = data.patient_id;
-            form.category.value = data.category;
-            form.diagnosis.value = data.diagnosis;
-            form.prescription.value = data.prescription;
-            form.notes.value = data.notes || '';
-            form.status.value = data.status;
-            
-            // Update modal title and save button
-            document.getElementById('recordModalLabel').textContent = 'Edit Medical Record';
-            const saveButton = document.querySelector('#recordModal .btn-primary');
-            saveButton.textContent = 'Update Record';
-            saveButton.onclick = () => updateRecord(recordId);
-            
-            // Show the modal
-            $('#recordModal').modal('show');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while fetching record details: ' + error.message);
-        });
-}
-
-function updateRecord(recordId) {
-    const form = document.getElementById('recordForm');
-    const formData = {
-        category: form.category.value,
-        diagnosis: form.diagnosis.value,
-        prescription: form.prescription.value,
-        notes: form.notes.value,
-        status: form.status.value
-    };
-    
-    fetch(`/update-record/${recordId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            $('#recordModal').modal('hide');
-            location.reload();
-        } else {
-            throw new Error(data.error || 'Unknown error occurred');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while updating the record: ' + error.message);
-    });
-}
-
 function viewRecord(recordId) {
-    currentRecordId = recordId;
     fetch(`/get-record-details/${recordId}/`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.error) {
-                throw new Error(data.error);
+                alert('Error: ' + data.error);
+                return;
             }
             
             const content = `
@@ -798,31 +491,8 @@ function viewRecord(recordId) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while fetching record details: ' + error.message);
+            alert('An error occurred while fetching record details.');
         });
-}
-
-function downloadRecord(recordId) {
-    if (!recordId) {
-        alert('No record selected for download.');
-        return;
-    }
-    window.location.href = `/download-record/${recordId}/`;
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
 }
 
 function saveRecord() {
@@ -858,6 +528,26 @@ function saveRecord() {
         console.error('Error:', error);
         alert('An error occurred while saving the record.');
     });
+}
+
+function downloadRecord() {
+    // Implementation will be added later
+    alert('Download functionality will be implemented soon.');
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
 </script>
 {% endblock %} 

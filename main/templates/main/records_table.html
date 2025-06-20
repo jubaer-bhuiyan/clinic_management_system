@@ -1,0 +1,80 @@
+{% if records %}
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th style="min-width: 200px;">Patient</th>
+                    <th style="min-width: 120px;">Category</th>
+                    <th style="min-width: 250px;">Diagnosis</th>
+                    <th style="min-width: 120px;">Date</th>
+                    <th style="min-width: 120px;">Status</th>
+                    <th style="min-width: 100px;" class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if record.patient.profile_picture %}
+                                    <img src="{{ record.patient.profile_picture.url }}" alt="Patient" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                {% else %}
+                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        {{ record.patient.user.get_full_name|make_list|first }}
+                                    </div>
+                                {% endif %}
+                                <div class="ml-3">
+                                    <h6 class="mb-0">{{ record.patient.user.get_full_name }}</h6>
+                                    <div class="small text-muted">
+                                        <i class="fas fa-user mr-1"></i>{{ record.patient.user.username }}<br>
+                                        <i class="fas fa-phone mr-1"></i>{{ record.patient.phone }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ record.category|lower }}">
+                                {{ record.category }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="text-wrap" style="max-width: 250px;">
+                                {{ record.diagnosis|truncatechars:100 }}
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                {{ record.created_at|date:"M d, Y" }}
+                                <br>
+                                <small class="text-muted">{{ record.created_at|time:"g:i A" }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ record.status|lower|cut:" " }}">
+                                {{ record.status }}
+                            </span>
+                        </td>
+                        <td class="text-right">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-info" onclick="viewRecord('{{ record.id }}')" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="editRecord('{{ record.id }}')" title="Edit Record">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="downloadRecord('{{ record.id }}')" title="Download Record">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <img src="{% static 'images/no-records.svg' %}" alt="No Records" style="width: 120px; opacity: 0.5;">
+        <p class="text-muted mt-3 mb-0">No medical records found</p>
+    </div>
+{% endif %} 

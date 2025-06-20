@@ -1,0 +1,405 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Medical Records - Clinic Management System{% endblock %}
+
+{% block content %}
+<div class="records-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-file-medical text-primary mr-2"></i>
+                                Medical Records
+                            </h5>
+                            <button class="btn btn-primary btn-sm" onclick="$('#recordModal').modal('show')">
+                                <i class="fas fa-plus mr-1"></i>
+                                Add Record
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if records %}
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th style="min-width: 200px;">Patient</th>
+                                            <th style="min-width: 120px;">Category</th>
+                                            <th style="min-width: 250px;">Diagnosis</th>
+                                            <th style="min-width: 120px;">Date</th>
+                                            <th style="min-width: 120px;">Status</th>
+                                            <th style="min-width: 100px;" class="text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for record in records %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        {% if record.patient.profile_picture %}
+                                                            <img src="{{ record.patient.profile_picture.url }}" alt="Patient" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                                        {% else %}
+                                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                                {{ record.patient.user.get_full_name|make_list|first }}
+                                                            </div>
+                                                        {% endif %}
+                                                        <div class="ml-2">
+                                                            <h6 class="mb-0">{{ record.patient.user.get_full_name }}</h6>
+                                                            <small class="text-muted">ID: {{ record.patient.id }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-{{ record.category|lower }}">
+                                                        {{ record.category }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="text-wrap" style="max-width: 250px;">
+                                                        {{ record.diagnosis|truncatechars:100 }}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        {{ record.created_at|date:"M d, Y" }}
+                                                        <br>
+                                                        <small class="text-muted">{{ record.created_at|time:"g:i A" }}</small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-{{ record.status|lower|cut:" " }}">
+                                                        {{ record.status }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-right">
+                                                    <div class="btn-group">
+                                                        <button type="button" class="btn btn-sm btn-info" onclick="viewRecord('{{ record.id }}')" title="View Details">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-primary" onclick="editRecord('{{ record.id }}')" title="Edit Record">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-secondary" onclick="downloadRecord('{{ record.id }}')" title="Download Record">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <img src="{% static 'images/no-records.svg' %}" alt="No Records" style="width: 120px; opacity: 0.5;">
+                                <p class="text-muted mt-3 mb-0">No medical records found</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Modal -->
+    <div class="modal fade" id="recordModal" tabindex="-1" role="dialog" aria-labelledby="recordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="recordModalLabel">Add Medical Record</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="recordForm" class="record-form">
+                        <div class="form-group">
+                            <label for="patient">Patient</label>
+                            <select class="form-control" id="patient" name="patient" required>
+                                <option value="">Select Patient...</option>
+                                {% for appointment in appointments %}
+                                    <option value="{{ appointment.patient.id }}">{{ appointment.patient.user.get_full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select class="form-control" id="category" name="category" required>
+                                <option value="General">General</option>
+                                <option value="Emergency">Emergency</option>
+                                <option value="Follow-up">Follow-up</option>
+                                <option value="Specialist">Specialist</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="diagnosis">Diagnosis</label>
+                            <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="prescription">Prescription</label>
+                            <textarea class="form-control" id="prescription" name="prescription" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="notes">Notes (Optional)</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select class="form-control" id="status" name="status" required>
+                                <option value="Active">Active</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Follow-up Required">Follow-up Required</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveRecord()">Save Record</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Record Modal -->
+    <div class="modal fade" id="viewRecordModal" tabindex="-1" role="dialog" aria-labelledby="viewRecordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewRecordModalLabel">Medical Record Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="viewRecordContent">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadRecord(currentRecordId)">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Global variables
+    let currentRecordId = null;
+    const doctorId = '{{ user.doctor.id }}';
+
+    // Event handlers for modal close
+    $('#recordModal').on('hidden.bs.modal', function () {
+        // Reset form and modal state
+        document.getElementById('recordForm').reset();
+        document.getElementById('recordModalLabel').textContent = 'Add Medical Record';
+        const saveButton = document.querySelector('#recordModal .btn-primary');
+        saveButton.textContent = 'Save Record';
+        saveButton.onclick = saveRecord;
+    });
+
+    $('#viewRecordModal').on('show.bs.modal', function (event) {
+        // Store the current record ID when viewing
+        const button = $(event.relatedTarget);
+        currentRecordId = button.data('record-id');
+    });
+
+    function editRecord(recordId) {
+        fetch(`/get-record-details/${recordId}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Fill the form with existing data
+                const form = document.getElementById('recordForm');
+                form.patient.value = data.patient_id;
+                form.category.value = data.category;
+                form.diagnosis.value = data.diagnosis;
+                form.prescription.value = data.prescription;
+                form.notes.value = data.notes || '';
+                form.status.value = data.status;
+                
+                // Update modal title and save button
+                document.getElementById('recordModalLabel').textContent = 'Edit Medical Record';
+                const saveButton = document.querySelector('#recordModal .btn-primary');
+                saveButton.textContent = 'Update Record';
+                saveButton.onclick = () => updateRecord(recordId);
+                
+                // Show the modal
+                $('#recordModal').modal('show');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while fetching record details: ' + error.message);
+            });
+    }
+
+    function updateRecord(recordId) {
+        const form = document.getElementById('recordForm');
+        const formData = {
+            category: form.category.value,
+            diagnosis: form.diagnosis.value,
+            prescription: form.prescription.value,
+            notes: form.notes.value,
+            status: form.status.value
+        };
+        
+        fetch(`/update-record/${recordId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                $('#recordModal').modal('hide');
+                location.reload();
+            } else {
+                throw new Error(data.error || 'Unknown error occurred');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating the record: ' + error.message);
+        });
+    }
+
+    function viewRecord(recordId) {
+        currentRecordId = recordId;
+        fetch(`/get-record-details/${recordId}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                const content = `
+                    <div class="record-details">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p><strong>Patient:</strong> ${data.patient_name}</p>
+                                <p><strong>Doctor:</strong> ${data.doctor_name}</p>
+                                <p><strong>Date:</strong> ${data.date}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Category:</strong> ${data.category}</p>
+                                <p><strong>Status:</strong> ${data.status}</p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="mb-3">
+                            <h6>Diagnosis</h6>
+                            <p>${data.diagnosis}</p>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Prescription</h6>
+                            <p>${data.prescription}</p>
+                        </div>
+                        ${data.notes ? `
+                            <div class="mb-3">
+                                <h6>Notes</h6>
+                                <p>${data.notes}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                document.getElementById('viewRecordContent').innerHTML = content;
+                $('#viewRecordModal').modal('show');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while fetching record details: ' + error.message);
+            });
+    }
+
+    function saveRecord() {
+        const form = document.getElementById('recordForm');
+        const formData = {
+            patient: form.patient.value,
+            doctor: doctorId,
+            category: form.category.value,
+            diagnosis: form.diagnosis.value,
+            prescription: form.prescription.value,
+            notes: form.notes.value,
+            status: form.status.value
+        };
+        
+        fetch('/add-record/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                $('#recordModal').modal('hide');
+                location.reload();
+            } else {
+                throw new Error(data.error || 'Unknown error occurred');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while saving the record: ' + error.message);
+        });
+    }
+
+    function downloadRecord(recordId) {
+        if (!recordId) {
+            alert('No record selected for download.');
+            return;
+        }
+        window.location.href = `/download-record/${recordId}/`;
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %} 
