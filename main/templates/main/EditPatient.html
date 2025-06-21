@@ -71,6 +71,42 @@
                     </div>
                 </div>
 
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h4 class="mb-3">Health Information</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="blood_type">Blood Type</label>
+                            <select class="form-control" id="blood_type" name="blood_type">
+                                <option value="">Select Blood Type</option>
+                                <option value="A+" {% if patient.blood_type == "A+" %}selected{% endif %}>A+</option>
+                                <option value="A-" {% if patient.blood_type == "A-" %}selected{% endif %}>A-</option>
+                                <option value="B+" {% if patient.blood_type == "B+" %}selected{% endif %}>B+</option>
+                                <option value="B-" {% if patient.blood_type == "B-" %}selected{% endif %}>B-</option>
+                                <option value="AB+" {% if patient.blood_type == "AB+" %}selected{% endif %}>AB+</option>
+                                <option value="AB-" {% if patient.blood_type == "AB-" %}selected{% endif %}>AB-</option>
+                                <option value="O+" {% if patient.blood_type == "O+" %}selected{% endif %}>O+</option>
+                                <option value="O-" {% if patient.blood_type == "O-" %}selected{% endif %}>O-</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="height">Height (cm)</label>
+                            <input type="number" step="0.01" class="form-control" id="height" name="height" value="{{ patient.height|default:'' }}" placeholder="Enter height in centimeters">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="weight">Weight (kg)</label>
+                            <input type="number" step="0.01" class="form-control" id="weight" name="weight" value="{{ patient.weight|default:'' }}" placeholder="Enter weight in kilograms">
+                        </div>
+                        <div class="form-group">
+                            <label for="allergies">Allergies</label>
+                            <textarea class="form-control" id="allergies" name="allergies" rows="3" placeholder="List any allergies (if none, leave blank)">{{ patient.allergies|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mt-4">
                     <button type="submit" class="btn btn-primary">Update Patient</button>
                     <a href="{% url 'manage_patient_profile' %}" class="btn btn-secondary">Cancel</a>

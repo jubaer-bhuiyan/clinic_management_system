@@ -179,7 +179,20 @@ def edit_profile(request):
                 patient = user.patient
                 patient.phone = request.POST.get('phone')
                 patient.address = request.POST.get('address')
-                patient.date_of_birth = request.POST.get('date_of_birth')
+                date_of_birth = request.POST.get('date_of_birth')
+                if date_of_birth:
+                    patient.date_of_birth = date_of_birth
+                
+                # Handle health information
+                blood_type = request.POST.get('blood_type')
+                print(f"Received blood type: {blood_type}")  # Debug log
+                patient.blood_type = blood_type if blood_type else None
+                
+                if request.POST.get('height'):
+                    patient.height = float(request.POST.get('height'))
+                if request.POST.get('weight'):
+                    patient.weight = float(request.POST.get('weight'))
+                patient.allergies = request.POST.get('allergies')
                 
                 # Handle profile picture
                 profile_picture = request.FILES.get('profile_picture')
@@ -194,8 +207,16 @@ def edit_profile(request):
                 
             except Exception as e:
                 messages.error(request, f'Error updating profile: {str(e)}')
+                print(f"Error in edit_profile: {str(e)}")  # Debug log
         
-        return render(request, 'main/EditProfile.html')
+        # Get the current blood type for debugging
+        current_blood_type = request.user.patient.blood_type
+        print(f"Current blood type: {current_blood_type}")  # Debug log
+        
+        return render(request, 'main/EditProfile.html', {
+            'user': request.user,
+            'blood_types': ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+        })
     
     elif hasattr(request.user, 'doctor'):
         if request.method == 'POST':
@@ -559,7 +580,13 @@ def get_record_details(request, record_id):
             'diagnosis': record.diagnosis,
             'prescription': record.prescription,
             'notes': record.notes,
-            'status': record.status
+            'status': record.status,
+            'patient_health': {
+                'blood_type': record.patient.blood_type or 'Not Set',
+                'height': f"{record.patient.height or 'Not Set'} cm",
+                'weight': f"{record.patient.weight or 'Not Set'} kg",
+                'allergies': record.patient.allergies or 'None'
+            }
         }
         return JsonResponse(data)
     except Record.DoesNotExist:
@@ -691,6 +718,15 @@ def edit_patient(request, patient_id):
         patient.phone = request.POST.get('phone')
         patient.address = request.POST.get('address')
         patient.date_of_birth = request.POST.get('date_of_birth')
+        
+        # Handle health information
+        patient.blood_type = request.POST.get('blood_type')
+        if request.POST.get('height'):
+            patient.height = float(request.POST.get('height'))
+        if request.POST.get('weight'):
+            patient.weight = float(request.POST.get('weight'))
+        patient.allergies = request.POST.get('allergies')
+        
         patient.save()
         
         messages.success(request, 'Patient updated successfully')
@@ -728,6 +764,12 @@ def patient_registration(request):
         date_of_birth = request.POST.get('date_of_birth')
         address = request.POST.get('address')
         
+        # Get health information
+        blood_type = request.POST.get('blood_type')
+        height = request.POST.get('height')
+        weight = request.POST.get('weight')
+        allergies = request.POST.get('allergies')
+        
         # Validate username
         if not username or len(username) < 3:
             messages.error(request, 'Username must be at least 3 characters long')
@@ -756,7 +798,11 @@ def patient_registration(request):
                 user=user,
                 phone=phone,
                 date_of_birth=date_of_birth,
-                address=address
+                address=address,
+                blood_type=blood_type,
+                height=float(height) if height else None,
+                weight=float(weight) if weight else None,
+                allergies=allergies
             )
             
             messages.success(request, 'Registration successful! Please login.')
@@ -966,6 +1012,13 @@ def download_record(request, record_id):
         response.write(f"Date: {record.created_at}\n")
         response.write(f"Category: {record.category}\n")
         response.write(f"Status: {record.status}\n\n")
+        
+        response.write("Patient Health Information:\n")
+        response.write(f"Blood Type: {record.patient.blood_type or 'Not Set'}\n")
+        response.write(f"Height: {record.patient.height or 'Not Set'} cm\n")
+        response.write(f"Weight: {record.patient.weight or 'Not Set'} kg\n")
+        response.write(f"Allergies: {record.patient.allergies or 'None'}\n\n")
+        
         response.write(f"Diagnosis:\n{record.diagnosis}\n\n")
         response.write(f"Prescription:\n{record.prescription}\n\n")
         if record.notes:

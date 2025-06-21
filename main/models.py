@@ -37,8 +37,13 @@ class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=20, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(null=True, blank=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/patients/', null=True, blank=True)
+    # Health Information
+    blood_type = models.CharField(max_length=5, null=True, blank=True)
+    height = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # in cm
+    weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # in kg
+    allergies = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
