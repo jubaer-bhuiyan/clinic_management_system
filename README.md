@@ -1,203 +1,120 @@
 # Clinical Appointment Management System (CAMS) 🏥
 
-<div align="center">
-
-[![Django Version](https://img.shields.io/badge/Django-4.2.23-green.svg)](https://www.djangoproject.com/)
-[![Python Version](https://img.shields.io/badge/Python-3.13+-blue.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)](https://github.com/jubaer-bhuiyan/clinic_management_system/graphs/commit-activity)
-
-*A modern, comprehensive solution for clinical appointment and healthcare management*
-
-[Features](#features) • [Installation](#installation) • [Documentation](#usage-guide) • [Security](#security-features) • [License](#license)
-
-</div>
+A modern, comprehensive solution for clinical appointment and healthcare management.
 
 ## 🌟 Overview
 
-The Clinical Appointment Management System (CAMS) is a sophisticated healthcare management solution designed to revolutionize how medical facilities handle appointments, patient records, and staff management. Built with modern web technologies and focusing on user experience, CAMS streamlines clinical operations while ensuring data security and system reliability.
+CAMS is a sophisticated healthcare management solution designed to streamline clinical operations while ensuring data security and system reliability. It provides a complete suite of tools for managing appointments, patient records, staff, and administrative tasks.
 
 ## ✨ Key Features
 
-<table>
-<tr>
-<td>
+### Recent Updates
+- **Staff Approval System**: New system for tracking and approving staff changes
+- **Enhanced Doctor Search**: Advanced filtering and modern UI for finding doctors
+- **Improved User Interface**: Modern Bootstrap 5 components and responsive design
 
-### 👥 User Management
-- Multi-role system (Admin/Doctor/Staff/Patient)
-- Secure authentication & authorization
-- Profile management with validation
+### Core Features
+- Multi-role user management (Admin/Doctor/Staff/Patient)
+- Smart appointment scheduling with conflict prevention
+- Digital health records management
+- Real-time messaging system
+- Comprehensive reporting and analytics
 - Role-based access control
-- Form validation and data integrity
-
-### 📅 Appointment System
-- Smart scheduling algorithm
-- Real-time availability checking
-- Automated notifications
-- Status tracking & history
-- Validated appointment forms
-
-### 👨‍⚕️ Doctor Management
-- Comprehensive profiles with validation
-- Schedule optimization
-- Patient assignment
-- Performance analytics
-- Secure profile updates
-
-</td>
-<td>
-
-### 🏥 Patient Management
-- Digital health records
-- Medical history tracking
-- Document management
-- Appointment history
-- Validated patient forms
-
-### 👨‍💼 Staff Management
-- Role-based assignments
-- Task management
-- Schedule coordination
-- Access control
-- Staff profile validation
-
-### 📊 Admin Dashboard
-- System configuration
-- Analytics & reporting
-- User management
-- Backup & restore
-- Form validation controls
-
-</td>
-</tr>
-</table>
+- Change approval workflow
 
 ## 🛠️ Technical Stack
-
-<table>
-<tr>
-<td>
 
 ### Backend
 - Django 4.2.23
 - Python 3.13+
 - SQLite3
+- Custom middleware
 - RESTful API
-- Django Forms
-
-### Security
-- Django Security Middleware
-- CSRF Protection
-- XSS Prevention
-- SQL Injection Guards
-- Form Validation
-
-</td>
-<td>
 
 ### Frontend
 - HTML5 & CSS3
 - JavaScript (ES6+)
-- Bootstrap 4.5.2
-- jQuery 3.5.1
-- Font Awesome 5.15.4
+- Bootstrap 5.3
+- Font Awesome 6.0
+- Responsive design
 
-### Additional
+### Dependencies
+- django-crispy-forms 2.1
+- crispy-bootstrap5
 - python-dateutil 2.8.2
 - Pillow 10.2.0
-- django-crispy-forms 2.1
-- crispy-bootstrap4 2023.1
-
-</td>
-</tr>
-</table>
+- django-widget-tweaks 1.5.0
+- django-cleanup 8.0.0
+- django-environ 0.11.2
+- django-filter 23.5
+- django-debug-toolbar 4.3.0
 
 ## 🚀 Installation
 
-1. **Clone the Repository**
+1. Clone and setup:
    ```bash
-   git clone https://github.com/jubaer-bhuiyan/clinic_management_system.git
+   git clone https://github.com/your-username/clinic_management_system.git
    cd clinic_management_system
-   ```
-
-2. **Set Up Virtual Environment**
-   ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install Dependencies**
-   ```bash
    pip install -r requirements.txt
    ```
 
-4. **Configure Database**
+2. Configure database:
    ```bash
+   python manage.py makemigrations
    python manage.py migrate
    python manage.py createsuperuser
    ```
 
-5. **Launch Application**
+3. Run server:
    ```bash
    python manage.py runserver
    ```
 
-   Access at: http://localhost:8000
+Access at: http://localhost:8000
 
-## 📚 Usage Guide
+## 👥 User Roles
 
-<table>
-<tr>
-<td>
-
-### 🔑 Admin Portal
+### Admin
 - System configuration
 - User management
+- Change approval
 - Analytics & reporting
-- Security controls
-- Form validation management
 
-### 👨‍⚕️ Doctor Interface
+### Doctor
 - Appointment management
 - Patient records
-- Messaging system
-- Schedule management
-- Profile updates with validation
+- Availability updates
+- Messaging
 
-</td>
-<td>
-
-### 👨‍💼 Staff Interface
+### Staff
 - Patient registration
 - Appointment booking
 - Record management
-- Report generation
-- Validated data entry
+- Change requests
 
-### 👤 Patient Portal
+### Patient
 - Book appointments
 - View medical history
 - Message doctors
-- Track appointments
-- Profile management with validation
+- Search doctors
 
-</td>
-</tr>
-</table>
+## 🔒 Security
 
-## 🔒 Security Features
-
-- Robust authentication system
 - Role-based access control
-- Encrypted data transmission
+- Staff change approval system
+- Form validation
+- CSRF protection
+- XSS prevention
+- SQL injection guards
 - Regular security audits
-- Automated backup system
-- Comprehensive error logging
-- Form validation and sanitization
-- Input data verification
 
 ## 📝 License
 
-Copyright © 2025 Jubaer Ahamed Bhuiyan. All rights reserved.
+Proprietary software. All rights reserved.
 
-This software and its documentation are protected by copyright law and international treaties. Unauthorized reproduction or distribution of this software, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under law.
+## 📞 Support
+
+- Email: support@cams.com
+- Hours: Monday-Friday, 9:00 AM - 5:00 PM EST 
