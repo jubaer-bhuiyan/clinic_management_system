@@ -114,7 +114,23 @@ Access at: http://localhost:8000
 
 Proprietary software. All rights reserved.
 
-## 📞 Support
+## 📞 Support & Contact
 
-- Email: support@cams.com
-- Hours: Monday-Friday, 9:00 AM - 5:00 PM EST 
+### Project Maintainer
+- **Name:** Jubaer Ahamed Bhuiyan
+- **Email:** jubaerahamed4444@gmail.com
+- **Location:** IUBAT - International University of Business Agriculture and Technology
+  4 Embankment Drive Road, Sector-10, Uttara Model Town, Dhaka-1230, Bangladesh
+
+### Social Links
+- **LinkedIn:** [Jubaer Ahamed Bhuiyan](https://www.linkedin.com/in/jubaer-ahamed-bhuiyan)
+- **Research:** [ResearchGate](https://www.researchgate.net/profile/Jubaer-Bhuiyan)
+- **ORCID:** [0009-0009-7673-1102](https://orcid.org/0009-0009-7673-1102)
+- **Twitter:** [@JubaerAhamed3](https://twitter.com/JubaerAhamed3)
+
+### Additional Profiles
+- **Facebook:** [bhuiyan.jubaer](https://facebook.com/bhuiyan.jubaer)
+- **Instagram:** [jubaer.bhuiyan](https://instagram.com/jubaer.bhuiyan)
+
+For technical support and inquiries, please feel free to reach out through any of the above channels.
+Timezone: UTC +06:00 (Bangladesh Standard Time) 
