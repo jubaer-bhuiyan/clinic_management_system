@@ -4,66 +4,227 @@
 {% block title %}Available Doctors - Clinic Management System{% endblock %}
 
 {% block content %}
-<div class="available-doctors">
-  <h2 class="mb-4">Available Doctors</h2>
-  
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
+<div class="available-doctors container py-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="mb-0">Available Doctors</h2>
+            <p class="text-muted">Find and book appointments with our qualified medical professionals</p>
+        </div>
+        <div class="col-md-4">
+            <div class="search-box">
+                <input type="text" id="doctorSearch" class="form-control" placeholder="Search by name or specialization...">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+        </div>
+    </div>
 
-  <div class="row">
-    {% for doctor in doctors %}
-      <div class="col-md-4 mb-4">
-        <div class="card doctor-card h-100">
-          <div class="card-header">
-            <h5 class="mb-0">Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</h5>
-          </div>
-          <div class="card-body">
-            <p class="card-text"><strong>Specialization:</strong> {{ doctor.specialization }}</p>
-            <p class="card-text"><strong>Contact:</strong> {{ doctor.phone }}</p>
-            <p class="card-text"><strong>Email:</strong> {{ doctor.user.email }}</p>
-            {% if user.is_authenticated %}
-              {% if not user.is_staff %}
-                <a href="{% url 'take_appointment' %}?doctor_id={{ doctor.id }}" class="btn btn-primary btn-block">Book Appointment</a>
-              {% endif %}
-            {% else %}
-              <a href="{% url 'user_login' %}" class="btn btn-outline-primary btn-block">Login to Book Appointment</a>
-            {% endif %}
-          </div>
+    <!-- Filters -->
+    <div class="filters mb-4">
+        <div class="row g-2">
+            <div class="col-md-4">
+                <select class="form-select" id="specializationFilter">
+                    <option value="">All Specializations</option>
+                    {% for doctor in doctors %}
+                        <option value="{{ doctor.specialization }}">{{ doctor.specialization }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" id="availabilityFilter">
+                    <option value="">All Availability</option>
+                    <option value="today">Available Today</option>
+                    <option value="week">Available This Week</option>
+                </select>
+            </div>
         </div>
-      </div>
-    {% empty %}
-      <div class="col-12">
-        <div class="alert alert-info">
-          No doctors are currently available.
-        </div>
-      </div>
-    {% endfor %}
-  </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row" id="doctorsList">
+        {% for doctor in doctors %}
+            <div class="col-md-6 col-lg-4 mb-4 doctor-item" 
+                 data-name="{{ doctor.user.first_name|lower }} {{ doctor.user.last_name|lower }}"
+                 data-specialization="{{ doctor.specialization|lower }}">
+                <div class="card doctor-card h-100">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <div class="doctor-avatar me-3">
+                                <i class="fas fa-user-md fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</h5>
+                                <span class="badge bg-primary">{{ doctor.specialization }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="doctor-info">
+                            <p class="card-text mb-3">
+                                <i class="fas fa-phone-alt me-2"></i>
+                                <strong>Contact:</strong> {{ doctor.phone }}
+                            </p>
+                            <p class="card-text mb-3">
+                                <i class="fas fa-envelope me-2"></i>
+                                <strong>Email:</strong> {{ doctor.user.email }}
+                            </p>
+                            <p class="card-text mb-3">
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                <strong>Address:</strong> {{ doctor.address }}
+                            </p>
+                            <div class="availability-info p-3 bg-light rounded mb-3">
+                                <h6 class="mb-2"><i class="fas fa-clock me-2"></i>Availability</h6>
+                                <p class="small mb-1">Monday - Friday: 9:00 AM - 5:00 PM</p>
+                                <p class="small mb-0">Lunch Break: 1:00 PM - 2:00 PM</p>
+                            </div>
+                        </div>
+                        {% if user.is_authenticated %}
+                            {% if not user.is_staff %}
+                                <a href="{% url 'take_appointment' %}?doctor_id={{ doctor.id }}" 
+                                   class="btn btn-primary w-100">
+                                    <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'user_login' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to Book Appointment
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>No doctors are currently available.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 
 {% block extra_css %}
 <style>
-  .available-doctors {
-    padding: 2rem 0;
-  }
-  .doctor-card {
-    transition: transform 0.2s;
-    border: none;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  }
-  .doctor-card:hover {
-    transform: translateY(-5px);
-  }
-  .doctor-card .card-header {
-    background-color: #87ceeb;
-    color: white;
-  }
-  .doctor-card .btn {
-    margin-top: 1rem;
-  }
+    .available-doctors {
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 60px);
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+
+    .doctor-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .doctor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+
+    .doctor-card .card-header {
+        background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+        color: white;
+        border-bottom: none;
+    }
+
+    .doctor-avatar {
+        width: 50px;
+        height: 50px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .doctor-info p {
+        margin-bottom: 0.5rem;
+    }
+
+    .availability-info {
+        border-left: 4px solid #0d6efd;
+    }
+
+    .badge {
+        font-weight: 500;
+        padding: 0.5em 1em;
+    }
+
+    .filters select {
+        border-radius: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .search-box {
+            margin-top: 1rem;
+        }
+    }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const doctorSearch = document.getElementById('doctorSearch');
+    const specializationFilter = document.getElementById('specializationFilter');
+    const availabilityFilter = document.getElementById('availabilityFilter');
+    const doctorItems = document.querySelectorAll('.doctor-item');
+
+    function filterDoctors() {
+        const searchTerm = doctorSearch.value.toLowerCase();
+        const specialization = specializationFilter.value.toLowerCase();
+
+        doctorItems.forEach(item => {
+            const doctorName = item.dataset.name;
+            const doctorSpecialization = item.dataset.specialization;
+            const matchesSearch = doctorName.includes(searchTerm) || 
+                                doctorSpecialization.includes(searchTerm);
+            const matchesSpecialization = !specialization || 
+                                        doctorSpecialization === specialization;
+
+            if (matchesSearch && matchesSpecialization) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    doctorSearch.addEventListener('input', filterDoctors);
+    specializationFilter.addEventListener('change', filterDoctors);
+    availabilityFilter.addEventListener('change', filterDoctors);
+
+    // Remove duplicate specializations from filter
+    const specializations = new Set();
+    const options = [];
+    specializationFilter.querySelectorAll('option').forEach(option => {
+        if (option.value && !specializations.has(option.value)) {
+            specializations.add(option.value);
+            options.push(option);
+        }
+    });
+    specializationFilter.innerHTML = '<option value="">All Specializations</option>';
+    options.forEach(option => specializationFilter.appendChild(option));
+});
+</script>
 {% endblock %}
 {% endblock %}
